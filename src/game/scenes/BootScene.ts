@@ -67,10 +67,11 @@ export class BootScene extends Phaser.Scene {
       const a = (Math.PI * 2 * i) / 10 - Math.PI / 2;
       pts.push(20 + Math.cos(a) * r, 20 + Math.sin(a) * r);
     }
-    g.fillPoints(
-      Array.from({ length: pts.length / 2 }, (_, i) => ({ x: pts[i * 2], y: pts[i * 2 + 1] })),
-      true,
+    const vecs = Array.from(
+      { length: pts.length / 2 },
+      (_, i) => new Phaser.Math.Vector2(pts[i * 2], pts[i * 2 + 1]),
     );
+    g.fillPoints(vecs, true);
     g.generateTexture("star", 40, 40);
     g.destroy();
   }
