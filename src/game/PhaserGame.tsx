@@ -2,10 +2,11 @@
  * Client-only Phaser mount. Instantiates the game once and destroys on unmount.
  */
 import { useEffect, useRef } from "react";
+import type Phaser from "phaser";
 
 export function PhaserGame() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const gameRef = useRef<any>(null);
+  const gameRef = useRef<Phaser.Game | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -31,6 +32,9 @@ export function PhaserGame() {
         scene: [BootScene, TitleScene, GameScene, ShopScene],
         render: { antialias: true, pixelArt: false },
         input: { activePointers: 2 },
+        // All sound is hand-rolled WebAudio (sfx.ts/music.ts) — skip Phaser's
+        // own sound manager so it doesn't spin up a second, unused AudioContext.
+        audio: { noAudio: true },
       });
     })();
     return () => {

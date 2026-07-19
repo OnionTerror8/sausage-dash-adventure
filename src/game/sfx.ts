@@ -2,21 +2,9 @@
  * Tiny procedural sound-effect helper using WebAudio.
  * No audio files needed — keeps the build small and load instant.
  */
+import { getAudioContext } from "./audio";
 
-let ctx: AudioContext | null = null;
 let muted = false;
-
-function ac(): AudioContext | null {
-  if (typeof window === "undefined") return null;
-  if (!ctx) {
-    try {
-      ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    } catch {
-      ctx = null;
-    }
-  }
-  return ctx;
-}
 
 export function setSoundMuted(m: boolean) {
   muted = m;
@@ -24,7 +12,7 @@ export function setSoundMuted(m: boolean) {
 
 function tone(freq: number, duration = 0.12, type: OscillatorType = "sine", gain = 0.15) {
   if (muted) return;
-  const a = ac();
+  const a = getAudioContext();
   if (!a) return;
   const osc = a.createOscillator();
   const g = a.createGain();
