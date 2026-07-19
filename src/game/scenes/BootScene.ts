@@ -3,6 +3,7 @@
  * (sausage body, coins, hazards, power-ups, particles). No file loading.
  */
 import Phaser from "phaser";
+import { buildHazardTextures } from "../obstacles";
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -17,8 +18,7 @@ export class BootScene extends Phaser.Scene {
     this.makeBalloonC();
     this.makeJellyBean();
     this.makeKetchup();
-    this.makeHazardHot();
-    this.makeHazardCold();
+    buildHazardTextures(this);
     this.makePowerup();
     this.makeCloud();
     this.makeHill();
@@ -119,36 +119,6 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0xd82030, 1);
     g.fillRoundedRect(8, 2, 12, 10, 3);
     g.generateTexture("ketchup", 28, 42);
-    g.destroy();
-  }
-
-  private makeHazardHot() {
-    // Frying pan silhouette
-    const g = this.g();
-    g.fillStyle(0x333333, 1);
-    g.fillCircle(30, 30, 26);
-    g.fillStyle(0x555555, 1);
-    g.fillCircle(30, 30, 20);
-    g.fillStyle(0xff7a2e, 1);
-    g.fillCircle(30, 28, 14);
-    g.fillStyle(0xffd66a, 0.9);
-    g.fillCircle(24, 24, 6);
-    g.fillStyle(0x333333, 1);
-    g.fillRoundedRect(52, 26, 22, 8, 3);
-    g.generateTexture("hot", 76, 60);
-    g.destroy();
-  }
-
-  private makeHazardCold() {
-    // Ice cube
-    const g = this.g();
-    g.fillStyle(0x9fe4ff, 1);
-    g.fillRoundedRect(0, 0, 56, 56, 10);
-    g.fillStyle(0xd8f2ff, 0.8);
-    g.fillRoundedRect(8, 8, 22, 14, 6);
-    g.fillStyle(0xffffff, 0.6);
-    g.fillCircle(40, 40, 6);
-    g.generateTexture("cold", 56, 56);
     g.destroy();
   }
 
