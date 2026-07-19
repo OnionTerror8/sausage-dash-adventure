@@ -267,7 +267,13 @@ export function getHazardById(id: string): HazardDef {
   return HAZARDS.find((h) => h.id === id) ?? HAZARDS[0];
 }
 
-export function pickRandomHazard(group: HazardGroup): HazardDef {
+/**
+ * Picks a random hazard from a group, optionally restricted to the first
+ * `variety` types (in catalogue order = unlock order) — this is how the
+ * DifficultyManager gates obstacle variety without raising raw difficulty.
+ */
+export function pickRandomHazard(group: HazardGroup, variety?: number): HazardDef {
   const list = HAZARDS.filter((h) => h.group === group);
-  return list[Phaser.Math.Between(0, list.length - 1)];
+  const pool = variety ? list.slice(0, Math.max(1, variety)) : list;
+  return pool[Phaser.Math.Between(0, pool.length - 1)];
 }

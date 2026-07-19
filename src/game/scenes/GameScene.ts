@@ -20,16 +20,17 @@ import { burst, floatText } from "../fx";
 import { Player } from "../entities/Player";
 import { Spawner, type Piece } from "../entities/Spawner";
 import { PowerupManager } from "../entities/PowerupManager";
+import { DifficultyManager } from "../difficulty";
 import { Hud } from "../ui/Hud";
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
   private spawner!: Spawner;
   private powerups!: PowerupManager;
+  private difficulty!: DifficultyManager;
   private hud!: Hud;
 
   private speed = SPEED.start;
-  private elapsed = 0;
   private lastHitAt = -9999;
 
   private runCoins = 0;
@@ -50,14 +51,14 @@ export class GameScene extends Phaser.Scene {
     this.runCoins = 0;
     this.score = 0;
     this.nextMilestone = 100;
-    this.elapsed = 0;
     this.speed = SPEED.start;
     this.paused = false;
     this.lastHitAt = -9999;
 
     this.buildBackground();
+    this.difficulty = new DifficultyManager();
     this.player = new Player(this, save.equipped);
-    this.spawner = new Spawner(this);
+    this.spawner = new Spawner(this, this.difficulty);
     this.powerups = new PowerupManager(this, this.player);
     this.hud = new Hud(this, () => this.togglePause());
 
@@ -144,11 +145,10 @@ export class GameScene extends Phaser.Scene {
   update(_time: number, deltaMs: number) {
     if (this.paused) return;
     const dt = deltaMs / 1000;
-    this.elapsed += deltaMs;
+    this.difficulty.update(deltaMs);
 
-    // Difficulty ramp
-    this.speed = Math.min(SPEED.max, SPEED.start + SPEED.rampPerSec * (this.elapsed / 1000));
-    this.speed *= this.powerups.speedMultiplier;
+    // Difficulty ramp (speed/spawn-gap math lives in DifficultyManager)
+    this.speed = this.difficulty.speed * this.powerups.speedMultiplier;
 
     // Parallax
     this.layers[0].tilePositionX += this.speed * 0.15 * dt;
@@ -156,7 +156,7 @@ export class GameScene extends Phaser.Scene {
     this.layers[2].tilePositionX += this.speed * 1.0 * dt;
 
     // Player physics
-    this.player.update(dt, this.elapsed, this.powerups.gravityScale);
+    this.player.update(dt, this.difficulty.elapsed, this.powerups.gravityScale);
 
     // Score
     this.score += Math.round(this.speed * dt * 0.1);
@@ -167,7 +167,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     // Spawn
-    this.spawner.tick(deltaMs, this.elapsed);
+    this.spawner.tick(deltaMs);
 
     // Move pieces + collide
     this.spawner.update(dt, this.speed, this.powerups.magnetOn, this.player.x, this.player.y, (p) =>

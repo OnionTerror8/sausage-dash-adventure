@@ -17,6 +17,7 @@ import {
 import { SFX } from "../sfx";
 import { floatText } from "../fx";
 import { getHazardById, pickRandomHazard, type HazardDef } from "../obstacles";
+import type { DifficultyManager } from "../difficulty";
 
 export type Kind = "coin" | "hazard" | "power" | "star" | "bean" | "ketchup" | "balloon";
 
@@ -32,15 +33,17 @@ export class Spawner {
   private nextSpawn = 400;
   private nextCoinRain = SPAWN.coinRainEveryMs;
 
-  constructor(private scene: Phaser.Scene) {}
+  constructor(
+    private scene: Phaser.Scene,
+    private difficulty: DifficultyManager,
+  ) {}
 
   /** Advance spawn timers, creating new groups/coin-rain as they come due. */
-  tick(deltaMs: number, elapsedMs: number) {
+  tick(deltaMs: number) {
     this.nextSpawn -= deltaMs;
     if (this.nextSpawn <= 0) {
       this.spawnGroup();
-      const base = Math.max(700, SPAWN.minGapMs - elapsedMs / 30);
-      this.nextSpawn = base + Math.random() * 500;
+      this.nextSpawn = this.difficulty.spawnGapMs + Math.random() * 500;
     }
 
     this.nextCoinRain -= deltaMs;
@@ -107,7 +110,7 @@ export class Spawner {
   }
 
   private spawnCoinTrail() {
-    const [lo, hi] = SPAWN.coinTrailLen;
+    const [lo, hi] = this.difficulty.coinTrailLen;
     const len = Phaser.Math.Between(lo, hi);
     const baseY = Phaser.Math.Between(GROUND_Y - 200, GROUND_Y - 80);
     const arc = Math.random() < 0.5;
@@ -135,7 +138,10 @@ export class Spawner {
   }
 
   private spawnHazard() {
-    const def = pickRandomHazard(Math.random() < 0.5 ? "hot" : "cold");
+    const def = pickRandomHazard(
+      Math.random() < 0.5 ? "hot" : "cold",
+      this.difficulty.hazardVariety,
+    );
     const x = GAME_WIDTH + 100;
     const y = GROUND_Y - 30 + (def.yOffset ?? 0);
     this.makePiece(x, y, "hazard", { hazardId: def.id });
