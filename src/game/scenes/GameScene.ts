@@ -34,6 +34,7 @@ export class GameScene extends Phaser.Scene {
 
   private runCoins = 0;
   private score = 0;
+  private nextMilestone = 100;
   private paused = false;
 
   private layers: Phaser.GameObjects.TileSprite[] = [];
@@ -48,6 +49,7 @@ export class GameScene extends Phaser.Scene {
     this.worldTheme = getWorld(save.equipped.theme);
     this.runCoins = 0;
     this.score = 0;
+    this.nextMilestone = 100;
     this.elapsed = 0;
     this.speed = SPEED.start;
     this.paused = false;
@@ -159,6 +161,10 @@ export class GameScene extends Phaser.Scene {
     // Score
     this.score += Math.round(this.speed * dt * 0.1);
     this.hud.setScore(this.score);
+    if (this.score >= this.nextMilestone) {
+      this.celebrateMilestone();
+      this.nextMilestone += 100;
+    }
 
     // Spawn
     this.spawner.tick(deltaMs, this.elapsed);
@@ -267,6 +273,7 @@ export class GameScene extends Phaser.Scene {
       this.runCoins += value;
       this.hud.setCoins(this.runCoins);
       SFX.coin();
+      this.player.celebrateCoin();
       burst(this, p.x, p.y, 0xffe082, 10);
       floatText(this, `+${value}`, p.x, p.y - 20, 0xfff29a, 20);
       this.spawner.remove(p);
@@ -274,6 +281,7 @@ export class GameScene extends Phaser.Scene {
     }
     if (p.kind === "power") {
       this.powerups.activate(p.power!);
+      this.player.celebrate();
       burst(this, p.x, p.y, POWERUP_COLOR[p.power!], 20);
       this.spawner.remove(p);
       return;
@@ -300,6 +308,14 @@ export class GameScene extends Phaser.Scene {
 
       this.spawner.remove(p);
     }
+  }
+
+  // ---------- Celebrations ----------
+  private celebrateMilestone() {
+    this.player.celebrate();
+    SFX.cheer();
+    floatText(this, "Yay!", this.player.x, this.player.y - 70, 0xffd83a, 26);
+    burst(this, this.player.x, this.player.y, 0xff9fd0, 14);
   }
 
   // ---------- Autosave ----------

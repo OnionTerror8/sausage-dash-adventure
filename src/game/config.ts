@@ -5,6 +5,7 @@ export const GROUND_Y = 440;
 
 export const PLAYER = {
   startX: 180,
+  minX: 70, // never let a hit bounce the sausage off the left edge
   radius: 34,
   jumpVelocity: -720,
   gravity: 1800,
@@ -26,14 +27,7 @@ export const SPAWN = {
   coinRainEveryMs: 22000,
 };
 
-export const POWERUPS = [
-  "magnet",
-  "superjump",
-  "shield",
-  "tiny",
-  "balloon",
-  "skates",
-] as const;
+export const POWERUPS = ["magnet", "superjump", "shield", "tiny", "balloon", "skates"] as const;
 export type PowerupId = (typeof POWERUPS)[number];
 
 export const POWERUP_DURATION_MS: Record<PowerupId, number> = {
