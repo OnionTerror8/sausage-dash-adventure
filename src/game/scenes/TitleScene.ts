@@ -96,11 +96,11 @@ export class TitleScene extends Phaser.Scene {
       this.scene.start("Game");
     });
 
-    // Shop button
+    // Bottom row: Shop, Dress Up, Music, Sound — four evenly spaced buttons.
     this.makeButton(
-      width / 2 - 200,
+      width / 2 - 315,
       height - 50,
-      180,
+      150,
       60,
       0x5fd0ff,
       "Shop",
@@ -108,14 +108,47 @@ export class TitleScene extends Phaser.Scene {
         SFX.click();
         this.scene.start("Shop");
       },
-      26,
+      24,
+    );
+
+    this.makeButton(
+      width / 2 - 105,
+      height - 50,
+      150,
+      60,
+      0xff9fd0,
+      "Dress Up",
+      () => {
+        SFX.click();
+        this.scene.start("Wardrobe");
+      },
+      20,
+    );
+
+    // Settings — music toggle
+    this.makeButton(
+      width / 2 + 105,
+      height - 50,
+      150,
+      60,
+      0xffb0f0,
+      save.settings.music ? "Music On" : "Music Off",
+      () => {
+        SFX.click();
+        const d = updateSave((d) => {
+          d.settings.music = !d.settings.music;
+        });
+        MUSIC.setMuted(!d.settings.music);
+        this.scene.restart();
+      },
+      20,
     );
 
     // Settings — sound toggle
     this.makeButton(
-      width / 2 + 200,
+      width / 2 + 315,
       height - 50,
-      180,
+      150,
       60,
       0xffcf3a,
       save.settings.sound ? "Sound On" : "Sound Off",
@@ -127,26 +160,7 @@ export class TitleScene extends Phaser.Scene {
         setSoundMuted(!d.settings.sound);
         this.scene.restart();
       },
-      24,
-    );
-
-    // Settings — music toggle
-    this.makeButton(
-      width / 2,
-      height - 50,
-      150,
-      60,
-      0xff9fd0,
-      save.settings.music ? "Music On" : "Music Off",
-      () => {
-        SFX.click();
-        const d = updateSave((d) => {
-          d.settings.music = !d.settings.music;
-        });
-        MUSIC.setMuted(!d.settings.music);
-        this.scene.restart();
-      },
-      22,
+      20,
     );
 
     // World swap arrows
