@@ -2,6 +2,7 @@
  * World themes: colours + parallax band definitions.
  * Adding a world = adding an entry here.
  */
+import type { BgMotifKind } from "./bgshapes";
 
 export interface WorldTheme {
   id: string;
@@ -16,6 +17,8 @@ export interface WorldTheme {
   finishScore: number;
   /** Friendly destination name shown on the world-complete celebration. */
   landmark: string;
+  /** Distant background silhouette motif, for a bit more per-world identity. */
+  bgMotif: BgMotifKind;
 }
 
 export const WORLDS: WorldTheme[] = [
@@ -30,6 +33,7 @@ export const WORLDS: WorldTheme[] = [
     accent: 0xff7a59,
     finishScore: 700,
     landmark: "the Cookie Jar",
+    bgMotif: "cupcake",
   },
   {
     id: "theme_picnic",
@@ -42,6 +46,7 @@ export const WORLDS: WorldTheme[] = [
     accent: 0xff5f7a,
     finishScore: 850,
     landmark: "the Picnic Basket",
+    bgMotif: "tree",
   },
   {
     id: "theme_camping",
@@ -54,6 +59,7 @@ export const WORLDS: WorldTheme[] = [
     accent: 0xff8a3d,
     finishScore: 1000,
     landmark: "the Campfire S'mores",
+    bgMotif: "tent",
   },
   {
     id: "theme_birthday",
@@ -66,6 +72,7 @@ export const WORLDS: WorldTheme[] = [
     accent: 0x8a5cff,
     finishScore: 1150,
     landmark: "the Birthday Cake",
+    bgMotif: "balloon",
   },
   {
     id: "theme_rainbow",
@@ -78,6 +85,7 @@ export const WORLDS: WorldTheme[] = [
     accent: 0xff5fa0,
     finishScore: 1300,
     landmark: "the Pot of Gold",
+    bgMotif: "rainbow",
   },
   {
     id: "theme_candy",
@@ -90,6 +98,7 @@ export const WORLDS: WorldTheme[] = [
     accent: 0x7ad0ff,
     finishScore: 1500,
     landmark: "the Candy Castle",
+    bgMotif: "candycane",
   },
 ];
 

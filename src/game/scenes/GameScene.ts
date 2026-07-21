@@ -24,6 +24,7 @@ import { PowerupManager } from "../entities/PowerupManager";
 import { DifficultyManager } from "../difficulty";
 import { Hud } from "../ui/Hud";
 import { drawIcon, type IconKind } from "../ui/icons";
+import { drawBgMotif } from "../bgshapes";
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -89,6 +90,19 @@ export class GameScene extends Phaser.Scene {
     const sky = this.add.graphics();
     sky.fillGradientStyle(t.sky[0], t.sky[0], t.sky[1], t.sky[1], 1);
     sky.fillRect(0, 0, w, h);
+
+    // Distant per-world silhouette (candy canes, tents, balloons...), behind the clouds.
+    const farLayer = this.makeStripTexture("far_" + t.id, w, 160, () => {
+      const g = this.add.graphics().setVisible(false);
+      for (let i = 0; i < 3; i++) {
+        const cx = 80 + i * 320 + Math.random() * 40;
+        const cy = 70 + Math.random() * 30;
+        drawBgMotif(g, t.bgMotif, cx, cy, 26, t.accent);
+      }
+      return g;
+    });
+    const far = this.add.tileSprite(0, 40, w, 160, farLayer).setOrigin(0, 0).setAlpha(0.3);
+    this.layers.push(far);
 
     // parallax cloud strip
     const cloudLayer = this.makeStripTexture("clouds_" + t.id, w, 140, () => {
@@ -159,10 +173,11 @@ export class GameScene extends Phaser.Scene {
     // Difficulty ramp (speed/spawn-gap math lives in DifficultyManager)
     this.speed = this.difficulty.speed * this.powerups.speedMultiplier;
 
-    // Parallax
-    this.layers[0].tilePositionX += this.speed * 0.15 * dt;
-    this.layers[1].tilePositionX += this.speed * 0.5 * dt;
-    this.layers[2].tilePositionX += this.speed * 1.0 * dt;
+    // Parallax (far background, clouds, hills, ground — slowest to fastest)
+    this.layers[0].tilePositionX += this.speed * 0.05 * dt;
+    this.layers[1].tilePositionX += this.speed * 0.15 * dt;
+    this.layers[2].tilePositionX += this.speed * 0.5 * dt;
+    this.layers[3].tilePositionX += this.speed * 1.0 * dt;
 
     // Player physics
     this.player.update(dt, this.difficulty.elapsed, this.powerups.gravityScale);
