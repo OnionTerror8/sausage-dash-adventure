@@ -19,6 +19,8 @@ export interface WorldTheme {
   landmark: string;
   /** Distant background silhouette motif, for a bit more per-world identity. */
   bgMotif: BgMotifKind;
+  /** SFX frequency multiplier — gives each world's sounds a subtly different character. */
+  pitchMultiplier: number;
 }
 
 export const WORLDS: WorldTheme[] = [
@@ -34,6 +36,7 @@ export const WORLDS: WorldTheme[] = [
     finishScore: 700,
     landmark: "the Cookie Jar",
     bgMotif: "cupcake",
+    pitchMultiplier: 1,
   },
   {
     id: "theme_picnic",
@@ -47,6 +50,7 @@ export const WORLDS: WorldTheme[] = [
     finishScore: 850,
     landmark: "the Picnic Basket",
     bgMotif: "tree",
+    pitchMultiplier: 1.05,
   },
   {
     id: "theme_camping",
@@ -60,6 +64,7 @@ export const WORLDS: WorldTheme[] = [
     finishScore: 1000,
     landmark: "the Campfire S'mores",
     bgMotif: "tent",
+    pitchMultiplier: 0.9,
   },
   {
     id: "theme_birthday",
@@ -73,6 +78,7 @@ export const WORLDS: WorldTheme[] = [
     finishScore: 1150,
     landmark: "the Birthday Cake",
     bgMotif: "balloon",
+    pitchMultiplier: 1.1,
   },
   {
     id: "theme_rainbow",
@@ -86,6 +92,7 @@ export const WORLDS: WorldTheme[] = [
     finishScore: 1300,
     landmark: "the Pot of Gold",
     bgMotif: "rainbow",
+    pitchMultiplier: 1.12,
   },
   {
     id: "theme_candy",
@@ -99,6 +106,7 @@ export const WORLDS: WorldTheme[] = [
     finishScore: 1500,
     landmark: "the Candy Castle",
     bgMotif: "candycane",
+    pitchMultiplier: 1.15,
   },
 ];
 

@@ -5,9 +5,17 @@
 import { getAudioContext } from "./audio";
 
 let muted = false;
+let pitch = 1;
 
 export function setSoundMuted(m: boolean) {
   muted = m;
+}
+
+/** Shifts every tone's frequency by this multiplier — gives each world's SFX
+ *  a subtly different character (e.g. Candy Kitchen brighter, Camping warmer)
+ *  on top of the shared procedural-tone system. */
+export function setSfxPitch(multiplier: number) {
+  pitch = multiplier;
 }
 
 function tone(freq: number, duration = 0.12, type: OscillatorType = "sine", gain = 0.15) {
@@ -17,7 +25,7 @@ function tone(freq: number, duration = 0.12, type: OscillatorType = "sine", gain
   const osc = a.createOscillator();
   const g = a.createGain();
   osc.type = type;
-  osc.frequency.value = freq;
+  osc.frequency.value = freq * pitch;
   g.gain.value = gain;
   g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + duration);
   osc.connect(g);

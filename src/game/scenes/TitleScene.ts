@@ -7,7 +7,7 @@ import { loadSave, updateSave } from "../storage";
 import { WORLDS, getWorld } from "../worlds";
 import { byId, byKind } from "../cosmetics";
 import { drawSausage } from "../render";
-import { SFX, setSoundMuted } from "../sfx";
+import { SFX, setSoundMuted, setSfxPitch } from "../sfx";
 import { MUSIC } from "../music";
 import { drawIcon, type IconKind } from "../ui/icons";
 
@@ -21,6 +21,7 @@ export class TitleScene extends Phaser.Scene {
     setSoundMuted(!save.settings.sound);
     MUSIC.setMuted(!save.settings.music);
     const world = getWorld(save.equipped.theme);
+    setSfxPitch(world.pitchMultiplier);
     const { width, height } = this.scale;
 
     // Sky

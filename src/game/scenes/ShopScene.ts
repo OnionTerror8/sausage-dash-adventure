@@ -5,7 +5,8 @@
 import Phaser from "phaser";
 import { loadSave, updateSave } from "../storage";
 import { byKind, type Cosmetic, type CosmeticKind } from "../cosmetics";
-import { SFX } from "../sfx";
+import { getWorld } from "../worlds";
+import { SFX, setSfxPitch } from "../sfx";
 import { HAPTICS } from "../haptics";
 import { burst, floatText } from "../fx";
 import { drawIcon, type IconKind } from "../ui/icons";
@@ -32,6 +33,7 @@ export class ShopScene extends Phaser.Scene {
     this.children.removeAll(true);
     const { width, height } = this.scale;
     const save = loadSave();
+    setSfxPitch(getWorld(save.equipped.theme).pitchMultiplier);
 
     const bg = this.add.graphics();
     bg.fillGradientStyle(0xfff2c0, 0xfff2c0, 0xffd0e5, 0xffd0e5, 1);

@@ -7,7 +7,8 @@ import Phaser from "phaser";
 import { loadSave, updateSave } from "../storage";
 import { byKind, type Cosmetic, type CosmeticKind } from "../cosmetics";
 import { drawSausage } from "../render";
-import { SFX } from "../sfx";
+import { getWorld } from "../worlds";
+import { SFX, setSfxPitch } from "../sfx";
 import { floatText } from "../fx";
 import { drawIcon, type IconKind } from "../ui/icons";
 import { drawFaceSwatch, drawWorldSwatch } from "../ui/swatches";
@@ -35,6 +36,7 @@ export class WardrobeScene extends Phaser.Scene {
     this.children.removeAll(true);
     const { width, height } = this.scale;
     const save = loadSave();
+    setSfxPitch(getWorld(save.equipped.theme).pitchMultiplier);
 
     const bg = this.add.graphics();
     bg.fillGradientStyle(0xd0f0ff, 0xd0f0ff, 0xffe0f0, 0xffe0f0, 1);

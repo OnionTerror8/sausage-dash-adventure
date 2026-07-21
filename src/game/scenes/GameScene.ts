@@ -15,7 +15,7 @@ import Phaser from "phaser";
 import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, PLAYER, SPEED, POWERUP_COLOR } from "../config";
 import { loadSave, updateSave } from "../storage";
 import { getWorld, WORLDS, type WorldTheme } from "../worlds";
-import { SFX } from "../sfx";
+import { SFX, setSfxPitch } from "../sfx";
 import { HAPTICS } from "../haptics";
 import { burst, floatText } from "../fx";
 import { Player } from "../entities/Player";
@@ -52,6 +52,7 @@ export class GameScene extends Phaser.Scene {
   create() {
     const save = loadSave();
     this.worldTheme = getWorld(save.equipped.theme);
+    setSfxPitch(this.worldTheme.pitchMultiplier);
     this.runCoins = 0;
     this.score = 0;
     this.nextMilestone = 100;
