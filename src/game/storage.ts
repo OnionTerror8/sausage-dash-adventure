@@ -19,6 +19,7 @@ export interface SaveData {
   settings: {
     sound: boolean;
     music: boolean;
+    chillMode: boolean; // hazard-free play, for the youngest/first-time players
   };
 }
 
@@ -28,7 +29,7 @@ const DEFAULT: SaveData = {
   unlocked: ["hat_none", "face_smile", "trail_none", "theme_kitchen"],
   completedWorlds: [],
   equipped: { hat: "hat_none", face: "face_smile", trail: "trail_none", theme: "theme_kitchen" },
-  settings: { sound: true, music: true },
+  settings: { sound: true, music: true, chillMode: false },
 };
 
 export function loadSave(): SaveData {

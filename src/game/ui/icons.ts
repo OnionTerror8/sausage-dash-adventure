@@ -23,7 +23,8 @@ export type IconKind =
   | "hat"
   | "face"
   | "sparkle"
-  | "globe";
+  | "globe"
+  | "shield";
 
 /** Draws an icon centered at (cx, cy). `s` is roughly the icon's half-size. */
 export function drawIcon(
@@ -187,6 +188,18 @@ export function drawIcon(
       g.strokeCircle(cx, cy, s);
       g.strokeEllipse(cx, cy, s * 2, s * 0.85);
       g.lineBetween(cx, cy - s, cx, cy + s);
+      break;
+
+    case "shield":
+      g.beginPath();
+      g.moveTo(cx, cy - s);
+      g.lineTo(cx + s * 0.8, cy - s * 0.55);
+      g.lineTo(cx + s * 0.8, cy + s * 0.15);
+      g.lineTo(cx, cy + s);
+      g.lineTo(cx - s * 0.8, cy + s * 0.15);
+      g.lineTo(cx - s * 0.8, cy - s * 0.55);
+      g.closePath();
+      g.strokePath();
       break;
   }
 }

@@ -4,6 +4,7 @@
  */
 import Phaser from "phaser";
 import { GAME_WIDTH } from "../config";
+import { drawIcon } from "./icons";
 
 export class Hud {
   private coinsText: Phaser.GameObjects.Text;
@@ -11,7 +12,12 @@ export class Hud {
   private progressBar: Phaser.GameObjects.Graphics;
   private progressAccent: number;
 
-  constructor(scene: Phaser.Scene, onPause: () => void, progressAccent = 0xffcf3a) {
+  constructor(
+    scene: Phaser.Scene,
+    onPause: () => void,
+    progressAccent = 0xffcf3a,
+    chillMode = false,
+  ) {
     this.progressAccent = progressAccent;
     scene.add.image(30, 30, "coin").setScale(1).setScrollFactor(0);
     this.coinsText = scene.add
@@ -38,6 +44,14 @@ export class Hud {
     // Journey progress toward this world's finish-line landmark.
     this.progressBar = scene.add.graphics().setScrollFactor(0);
     this.setProgress(0);
+
+    // Small badge reminding the player Chill Mode (no hazards) is active.
+    if (chillMode) {
+      const badge = scene.add.graphics().setScrollFactor(0);
+      badge.fillStyle(0x7ad9c4, 0.9);
+      badge.fillCircle(30, 66, 16);
+      drawIcon(badge, "shield", 30, 66, 10, 0xffffff);
+    }
 
     const pw = 68;
     const px = GAME_WIDTH - pw / 2 - 16;

@@ -62,9 +62,14 @@ export class GameScene extends Phaser.Scene {
     this.buildBackground();
     this.difficulty = new DifficultyManager();
     this.player = new Player(this, save.equipped);
-    this.spawner = new Spawner(this, this.difficulty);
+    this.spawner = new Spawner(this, this.difficulty, save.settings.chillMode);
     this.powerups = new PowerupManager(this, this.player);
-    this.hud = new Hud(this, () => this.togglePause(), this.worldTheme.accent);
+    this.hud = new Hud(
+      this,
+      () => this.togglePause(),
+      this.worldTheme.accent,
+      save.settings.chillMode,
+    );
 
     // Input
     this.input.on("pointerdown", () => this.tryJump());

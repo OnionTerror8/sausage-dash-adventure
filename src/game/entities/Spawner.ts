@@ -36,6 +36,7 @@ export class Spawner {
   constructor(
     private scene: Phaser.Scene,
     private difficulty: DifficultyManager,
+    private chillMode = false,
   ) {}
 
   /** Advance spawn timers, creating new groups/coin-rain as they come due. */
@@ -105,7 +106,8 @@ export class Spawner {
     // Choose one thing per group so combos stay easy.
     const r = Math.random();
     if (r < 0.15) return this.spawnPowerup();
-    if (r < 0.15 + SPAWN.hazardChance * 0.7) return this.spawnHazard();
+    // Chill Mode: hazards never spawn — that probability slice becomes more coins instead.
+    if (!this.chillMode && r < 0.15 + SPAWN.hazardChance * 0.7) return this.spawnHazard();
     return this.spawnCoinTrail();
   }
 

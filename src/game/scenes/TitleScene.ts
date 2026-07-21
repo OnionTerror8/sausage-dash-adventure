@@ -108,11 +108,11 @@ export class TitleScene extends Phaser.Scene {
       "play",
     );
 
-    // Bottom row: Shop, Dress Up, Music, Sound — four evenly spaced buttons.
+    // Bottom row: Shop, Dress Up, Chill Mode, Music, Sound — five evenly spaced buttons.
     this.makeButton(
-      width / 2 - 315,
+      width / 2 - 300,
       height - 50,
-      150,
+      130,
       60,
       0x5fd0ff,
       "Shop",
@@ -120,15 +120,15 @@ export class TitleScene extends Phaser.Scene {
         SFX.click();
         this.scene.start("Shop");
       },
-      22,
+      20,
       0xffffff,
       "shop",
     );
 
     this.makeButton(
-      width / 2 - 105,
+      width / 2 - 150,
       height - 50,
-      150,
+      130,
       60,
       0xff9fd0,
       "Dress Up",
@@ -136,16 +136,36 @@ export class TitleScene extends Phaser.Scene {
         SFX.click();
         this.scene.start("Wardrobe");
       },
-      18,
+      16,
       0xffffff,
       "wardrobe",
     );
 
+    // Chill Mode — hazard-free play for the youngest/first-time players.
+    this.makeButton(
+      width / 2,
+      height - 50,
+      130,
+      60,
+      0x7ad9c4,
+      save.settings.chillMode ? "Chill On" : "Chill Off",
+      () => {
+        SFX.click();
+        updateSave((d) => {
+          d.settings.chillMode = !d.settings.chillMode;
+        });
+        this.scene.restart();
+      },
+      16,
+      0xffffff,
+      "shield",
+    );
+
     // Settings — music toggle
     this.makeButton(
-      width / 2 + 105,
+      width / 2 + 150,
       height - 50,
-      150,
+      130,
       60,
       0xffb0f0,
       save.settings.music ? "Music On" : "Music Off",
@@ -157,16 +177,16 @@ export class TitleScene extends Phaser.Scene {
         MUSIC.setMuted(!d.settings.music);
         this.scene.restart();
       },
-      18,
+      16,
       0xffffff,
       save.settings.music ? "music-on" : "music-off",
     );
 
     // Settings — sound toggle
     this.makeButton(
-      width / 2 + 315,
+      width / 2 + 300,
       height - 50,
-      150,
+      130,
       60,
       0xffcf3a,
       save.settings.sound ? "Sound On" : "Sound Off",
