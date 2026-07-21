@@ -22,6 +22,7 @@ import { Spawner, type Piece } from "../entities/Spawner";
 import { PowerupManager } from "../entities/PowerupManager";
 import { DifficultyManager } from "../difficulty";
 import { Hud } from "../ui/Hud";
+import { drawIcon, type IconKind } from "../ui/icons";
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -221,20 +222,27 @@ export class GameScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
     c.add(title);
-    const mkBtn = (y: number, label: string, color: number, cb: () => void) => {
+    const mkBtn = (y: number, label: string, color: number, icon: IconKind, cb: () => void) => {
       const btn = this.add.graphics();
       btn.fillStyle(color, 1);
       btn.fillRoundedRect(w / 2 - 140, y - 32, 280, 64, 18);
       c.add(btn);
       const t = this.add
-        .text(w / 2, y, label, {
+        .text(0, y, label, {
           fontFamily: "'Fredoka',system-ui,sans-serif",
           fontSize: "28px",
           color: "#ffffff",
           stroke: "#00000055",
           strokeThickness: 2,
         })
-        .setOrigin(0.5);
+        .setOrigin(0, 0.5);
+      const iconSize = 20;
+      const gap = iconSize * 2 + 10;
+      const startX = w / 2 - (t.width + gap) / 2;
+      const ig = this.add.graphics();
+      drawIcon(ig, icon, startX + iconSize, y, iconSize, 0xffffff);
+      c.add(ig);
+      t.setPosition(startX + gap, y);
       c.add(t);
       const hit = this.add
         .rectangle(w / 2, y, 280, 64, 0x000000, 0)
@@ -245,12 +253,12 @@ export class GameScene extends Phaser.Scene {
       });
       c.add(hit);
     };
-    mkBtn(h / 2 - 40, "Resume", 0x5fd07a, () => this.togglePause());
-    mkBtn(h / 2 + 40, "Home", 0x66d6ff, () => {
+    mkBtn(h / 2 - 40, "Resume", 0x5fd07a, "play", () => this.togglePause());
+    mkBtn(h / 2 + 40, "Home", 0x66d6ff, "home", () => {
       this.commitRun();
       this.scene.start("Title");
     });
-    mkBtn(h / 2 + 120, "Shop", 0xffcf3a, () => {
+    mkBtn(h / 2 + 120, "Shop", 0xffcf3a, "shop", () => {
       this.commitRun();
       this.scene.start("Shop");
     });
@@ -411,20 +419,27 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0, 0.5);
     c.add(coinLabel);
 
-    const mkBtn = (y: number, label: string, color: number, cb: () => void) => {
+    const mkBtn = (y: number, label: string, color: number, icon: IconKind, cb: () => void) => {
       const btn = this.add.graphics();
       btn.fillStyle(color, 1);
       btn.fillRoundedRect(w / 2 - 140, y - 32, 280, 64, 18);
       c.add(btn);
       const t = this.add
-        .text(w / 2, y, label, {
+        .text(0, y, label, {
           fontFamily: "'Fredoka',system-ui,sans-serif",
           fontSize: "26px",
           color: "#ffffff",
           stroke: "#00000055",
           strokeThickness: 2,
         })
-        .setOrigin(0.5);
+        .setOrigin(0, 0.5);
+      const iconSize = 18;
+      const gap = iconSize * 2 + 10;
+      const startX = w / 2 - (t.width + gap) / 2;
+      const ig = this.add.graphics();
+      drawIcon(ig, icon, startX + iconSize, y, iconSize, 0xffffff);
+      c.add(ig);
+      t.setPosition(startX + gap, y);
       c.add(t);
       const hit = this.add
         .rectangle(w / 2, y, 280, 64, 0x000000, 0)
@@ -437,10 +452,10 @@ export class GameScene extends Phaser.Scene {
     };
 
     let y = h / 2 - 5;
-    mkBtn(y, "Play Again", 0x5fd07a, () => this.scene.restart());
+    mkBtn(y, "Play Again", 0x5fd07a, "replay", () => this.scene.restart());
     y += 70;
     if (nextWorld) {
-      mkBtn(y, "Next World", 0xff9fd0, () => {
+      mkBtn(y, "Next World", 0xff9fd0, "forward", () => {
         updateSave((d) => {
           d.equipped.theme = nextWorld.id;
         });
@@ -448,7 +463,7 @@ export class GameScene extends Phaser.Scene {
       });
       y += 70;
     }
-    mkBtn(y, "Home", 0x66d6ff, () => this.scene.start("Title"));
+    mkBtn(y, "Home", 0x66d6ff, "home", () => this.scene.start("Title"));
   }
 
   // ---------- Autosave ----------

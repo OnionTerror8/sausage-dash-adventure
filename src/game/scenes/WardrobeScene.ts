@@ -9,12 +9,13 @@ import { byKind, type Cosmetic, type CosmeticKind } from "../cosmetics";
 import { drawSausage } from "../render";
 import { SFX } from "../sfx";
 import { floatText } from "../fx";
+import { drawIcon, type IconKind } from "../ui/icons";
 
-const TABS: { id: CosmeticKind; label: string }[] = [
-  { id: "hat", label: "Hats" },
-  { id: "face", label: "Faces" },
-  { id: "trail", label: "Trails" },
-  { id: "theme", label: "Worlds" },
+const TABS: { id: CosmeticKind; label: string; icon: IconKind }[] = [
+  { id: "hat", label: "Hats", icon: "hat" },
+  { id: "face", label: "Faces", icon: "face" },
+  { id: "trail", label: "Trails", icon: "sparkle" },
+  { id: "theme", label: "Worlds", icon: "globe" },
 ];
 
 export class WardrobeScene extends Phaser.Scene {
@@ -48,19 +49,21 @@ export class WardrobeScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    // Back button
+    // Back button — icon only, universally readable without text.
     this.button(
       80,
       40,
       120,
       54,
       0x9fc6ff,
-      "Back",
+      "",
       () => {
         SFX.click();
         this.scene.start("Title");
       },
       24,
+      0xffffff,
+      "back",
     );
 
     // Shop button — for when a locked item catches their eye.
@@ -75,7 +78,9 @@ export class WardrobeScene extends Phaser.Scene {
         SFX.click();
         this.scene.start("Shop");
       },
-      24,
+      20,
+      0xffffff,
+      "shop",
     );
 
     // Live preview
@@ -106,8 +111,9 @@ export class WardrobeScene extends Phaser.Scene {
           this.tab = t.id;
           this.drawAll();
         },
-        24,
+        22,
         active ? 0xffffff : 0x333333,
+        t.icon,
       );
     });
 
@@ -160,28 +166,31 @@ export class WardrobeScene extends Phaser.Scene {
     if (!owned) {
       // Simple padlock hint — a locked cosmetic, not a threatening icon.
       const lock = this.add.graphics();
-      lock.fillStyle(0x999999, 0.9);
-      lock.fillRoundedRect(x - 10, cy - 4, 20, 16, 4);
-      lock.lineStyle(3, 0x999999, 0.9);
-      lock.strokeCircle(x, cy - 6, 8);
-      lock.fillStyle(0x999999, 0.9);
-      lock.fillRect(x - 10, cy - 6, 20, 6);
+      drawIcon(lock, "lock", x, cy - 2, 12, 0x999999);
     }
 
     const label = equipped ? "Wearing" : owned ? "Wear" : "Locked";
+    const labelIcon: IconKind = equipped ? "check" : owned ? "wardrobe" : "lock";
     const color = equipped ? 0x66cc66 : owned ? 0x66d6ff : 0xcccccc;
+    const btnY = y + h / 2 - 20;
     const btn = this.add.graphics();
     btn.fillStyle(color, 1);
-    btn.fillRoundedRect(x - 55, y + h / 2 - 34, 110, 28, 12);
-    this.add
-      .text(x, y + h / 2 - 20, label, {
+    btn.fillRoundedRect(x - 55, btnY - 14, 110, 28, 12);
+    const t = this.add
+      .text(0, btnY, label, {
         fontFamily: "'Fredoka',system-ui,sans-serif",
-        fontSize: "16px",
+        fontSize: "15px",
         color: "#ffffff",
         stroke: "#00000055",
         strokeThickness: 2,
       })
-      .setOrigin(0.5);
+      .setOrigin(0, 0.5);
+    const iconSize = 9;
+    const gap = iconSize * 2 + 6;
+    const startX = x - (t.width + gap) / 2;
+    const iconG = this.add.graphics();
+    drawIcon(iconG, labelIcon, startX + iconSize, btnY, iconSize, 0xffffff);
+    t.setPosition(startX + gap, btnY);
 
     const hit = this.add.rectangle(x, y, w, h, 0x000000, 0).setInteractive({ useHandCursor: true });
     hit.on("pointerdown", () => {
@@ -219,21 +228,38 @@ export class WardrobeScene extends Phaser.Scene {
     onClick: () => void,
     fontSize = 24,
     textColor = 0xffffff,
+    icon?: IconKind,
   ) {
     const bg = this.add.graphics();
     bg.fillStyle(color, 1);
     bg.fillRoundedRect(x - w / 2, y - h / 2, w, h, 16);
     bg.lineStyle(3, 0xffffff, 0.9);
     bg.strokeRoundedRect(x - w / 2, y - h / 2, w, h, 16);
-    this.add
-      .text(x, y, label, {
-        fontFamily: "'Fredoka',system-ui,sans-serif",
-        fontSize: `${fontSize}px`,
-        color: "#" + textColor.toString(16).padStart(6, "0"),
-        stroke: "#00000055",
-        strokeThickness: 2,
-      })
-      .setOrigin(0.5);
+
+    if (icon && !label) {
+      const ig = this.add.graphics();
+      drawIcon(ig, icon, x, y, Math.min(w, h) * 0.28, textColor);
+    } else if (label) {
+      const t = this.add
+        .text(0, y, label, {
+          fontFamily: "'Fredoka',system-ui,sans-serif",
+          fontSize: `${fontSize}px`,
+          color: "#" + textColor.toString(16).padStart(6, "0"),
+          stroke: "#00000055",
+          strokeThickness: 2,
+        })
+        .setOrigin(0, 0.5);
+      const iconSize = Math.min(h * 0.32, 18);
+      const gap = icon ? iconSize * 2 + 8 : 0;
+      const totalW = t.width + gap;
+      const startX = x - totalW / 2;
+      if (icon) {
+        const ig = this.add.graphics();
+        drawIcon(ig, icon, startX + iconSize, y, iconSize, textColor);
+      }
+      t.setPosition(startX + gap, y);
+    }
+
     const hit = this.add.rectangle(x, y, w, h, 0x000000, 0).setInteractive({ useHandCursor: true });
     hit.on("pointerdown", onClick);
   }

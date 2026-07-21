@@ -9,6 +9,7 @@ import { byId, byKind } from "../cosmetics";
 import { drawSausage } from "../render";
 import { SFX, setSoundMuted } from "../sfx";
 import { MUSIC } from "../music";
+import { drawIcon, type IconKind } from "../ui/icons";
 
 export class TitleScene extends Phaser.Scene {
   constructor() {
@@ -91,10 +92,21 @@ export class TitleScene extends Phaser.Scene {
     });
 
     // Play button
-    this.makeButton(width / 2, height - 130, 260, 90, 0xff6a4a, "PLAY", () => {
-      SFX.click();
-      this.scene.start("Game");
-    });
+    this.makeButton(
+      width / 2,
+      height - 130,
+      260,
+      90,
+      0xff6a4a,
+      "PLAY",
+      () => {
+        SFX.click();
+        this.scene.start("Game");
+      },
+      34,
+      0xffffff,
+      "play",
+    );
 
     // Bottom row: Shop, Dress Up, Music, Sound — four evenly spaced buttons.
     this.makeButton(
@@ -108,7 +120,9 @@ export class TitleScene extends Phaser.Scene {
         SFX.click();
         this.scene.start("Shop");
       },
-      24,
+      22,
+      0xffffff,
+      "shop",
     );
 
     this.makeButton(
@@ -122,7 +136,9 @@ export class TitleScene extends Phaser.Scene {
         SFX.click();
         this.scene.start("Wardrobe");
       },
-      20,
+      18,
+      0xffffff,
+      "wardrobe",
     );
 
     // Settings — music toggle
@@ -141,7 +157,9 @@ export class TitleScene extends Phaser.Scene {
         MUSIC.setMuted(!d.settings.music);
         this.scene.restart();
       },
-      20,
+      18,
+      0xffffff,
+      save.settings.music ? "music-on" : "music-off",
     );
 
     // Settings — sound toggle
@@ -160,7 +178,9 @@ export class TitleScene extends Phaser.Scene {
         setSoundMuted(!d.settings.sound);
         this.scene.restart();
       },
-      20,
+      18,
+      0xffffff,
+      save.settings.sound ? "sound-on" : "sound-off",
     );
 
     // World swap arrows
@@ -171,7 +191,7 @@ export class TitleScene extends Phaser.Scene {
       60,
       60,
       0xffffff,
-      "‹",
+      "",
       () => {
         const owned = WORLDS.filter((w) => save.unlocked.includes(w.id));
         const i = owned.findIndex((w) => w.id === save.equipped.theme);
@@ -183,6 +203,7 @@ export class TitleScene extends Phaser.Scene {
       },
       36,
       0x333333,
+      "back",
     );
     this.makeButton(
       width - 60,
@@ -190,7 +211,7 @@ export class TitleScene extends Phaser.Scene {
       60,
       60,
       0xffffff,
-      "›",
+      "",
       () => {
         const owned = WORLDS.filter((w) => save.unlocked.includes(w.id));
         const i = owned.findIndex((w) => w.id === save.equipped.theme);
@@ -202,6 +223,7 @@ export class TitleScene extends Phaser.Scene {
       },
       36,
       0x333333,
+      "forward",
     );
 
     this.add
@@ -228,6 +250,8 @@ export class TitleScene extends Phaser.Scene {
     }
   }
 
+  /** `icon` renders alongside (or instead of, if label is "") the text label, so
+   *  pre-reading players can navigate by shape as well as by word. */
   private makeButton(
     x: number,
     y: number,
@@ -238,6 +262,7 @@ export class TitleScene extends Phaser.Scene {
     onClick: () => void,
     fontSize = 34,
     textColor = 0xffffff,
+    icon?: IconKind,
   ) {
     const c = this.add.container(x, y);
     const bg = this.add.graphics();
@@ -247,16 +272,35 @@ export class TitleScene extends Phaser.Scene {
     bg.fillRoundedRect(-w / 2, -h / 2, w, h, 22);
     bg.lineStyle(4, 0xffffff, 0.9);
     bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 22);
-    const t = this.add
-      .text(0, 0, label, {
-        fontFamily: "'Fredoka',system-ui,sans-serif",
-        fontSize: `${fontSize}px`,
-        color: "#" + textColor.toString(16).padStart(6, "0"),
-        stroke: "#00000055",
-        strokeThickness: 3,
-      })
-      .setOrigin(0.5);
-    c.add([bg, t]);
+    c.add(bg);
+
+    if (icon && !label) {
+      const ig = this.add.graphics();
+      drawIcon(ig, icon, 0, 0, Math.min(w, h) * 0.28, textColor);
+      c.add(ig);
+    } else if (label) {
+      const t = this.add
+        .text(0, 0, label, {
+          fontFamily: "'Fredoka',system-ui,sans-serif",
+          fontSize: `${fontSize}px`,
+          color: "#" + textColor.toString(16).padStart(6, "0"),
+          stroke: "#00000055",
+          strokeThickness: 3,
+        })
+        .setOrigin(0, 0.5);
+      const iconSize = Math.min(h * 0.32, 20);
+      const gap = icon ? iconSize * 2 + 10 : 0;
+      const totalW = t.width + gap;
+      const startX = -totalW / 2;
+      if (icon) {
+        const ig = this.add.graphics();
+        drawIcon(ig, icon, startX + iconSize, 0, iconSize, textColor);
+        c.add(ig);
+      }
+      t.setPosition(startX + gap, 0);
+      c.add(t);
+    }
+
     c.setSize(w, h);
     c.setInteractive({ useHandCursor: true });
     c.on("pointerdown", () => {

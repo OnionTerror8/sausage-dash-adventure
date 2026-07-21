@@ -7,12 +7,13 @@ import { loadSave, updateSave } from "../storage";
 import { byKind, type Cosmetic, type CosmeticKind } from "../cosmetics";
 import { SFX } from "../sfx";
 import { burst, floatText } from "../fx";
+import { drawIcon, type IconKind } from "../ui/icons";
 
-const TABS: { id: CosmeticKind; label: string }[] = [
-  { id: "hat", label: "Hats" },
-  { id: "face", label: "Faces" },
-  { id: "trail", label: "Trails" },
-  { id: "theme", label: "Worlds" },
+const TABS: { id: CosmeticKind; label: string; icon: IconKind }[] = [
+  { id: "hat", label: "Hats", icon: "hat" },
+  { id: "face", label: "Faces", icon: "face" },
+  { id: "trail", label: "Trails", icon: "sparkle" },
+  { id: "theme", label: "Worlds", icon: "globe" },
 ];
 
 export class ShopScene extends Phaser.Scene {
@@ -54,19 +55,21 @@ export class ShopScene extends Phaser.Scene {
       strokeThickness: 6,
     });
 
-    // Back button
+    // Back button — icon only, universally readable without text.
     this.button(
       80,
       40,
       120,
       54,
       0x9fc6ff,
-      "Back",
+      "",
       () => {
         SFX.click();
         this.scene.start("Title");
       },
       24,
+      0xffffff,
+      "back",
     );
 
     // Dress Up button — Wardrobe is a tap away without going back through Title.
@@ -81,7 +84,9 @@ export class ShopScene extends Phaser.Scene {
         SFX.click();
         this.scene.start("Wardrobe");
       },
-      20,
+      18,
+      0xffffff,
+      "wardrobe",
     );
 
     // Tabs
@@ -100,8 +105,9 @@ export class ShopScene extends Phaser.Scene {
           this.tab = t.id;
           this.drawAll();
         },
-        24,
+        22,
         active ? 0xffffff : 0x333333,
+        t.icon,
       );
     });
 
@@ -160,9 +166,14 @@ export class ShopScene extends Phaser.Scene {
     btn.fillStyle(color, 1);
     btn.fillRoundedRect(-60, h / 2 - 40, 120, 32, 12);
     tile.add(btn);
+    if (owned) {
+      const check = this.add.graphics();
+      drawIcon(check, "check", -34, h / 2 - 24, 10, 0xffffff);
+      tile.add(check);
+    }
     tile.add(
       this.add
-        .text(0, h / 2 - 24, label, {
+        .text(owned ? 10 : 0, h / 2 - 24, label, {
           fontFamily: "'Fredoka',system-ui,sans-serif",
           fontSize: "18px",
           color: "#ffffff",
@@ -206,21 +217,38 @@ export class ShopScene extends Phaser.Scene {
     onClick: () => void,
     fontSize = 24,
     textColor = 0xffffff,
+    icon?: IconKind,
   ) {
     const bg = this.add.graphics();
     bg.fillStyle(color, 1);
     bg.fillRoundedRect(x - w / 2, y - h / 2, w, h, 16);
     bg.lineStyle(3, 0xffffff, 0.9);
     bg.strokeRoundedRect(x - w / 2, y - h / 2, w, h, 16);
-    this.add
-      .text(x, y, label, {
-        fontFamily: "'Fredoka',system-ui,sans-serif",
-        fontSize: `${fontSize}px`,
-        color: "#" + textColor.toString(16).padStart(6, "0"),
-        stroke: "#00000055",
-        strokeThickness: 2,
-      })
-      .setOrigin(0.5);
+
+    if (icon && !label) {
+      const ig = this.add.graphics();
+      drawIcon(ig, icon, x, y, Math.min(w, h) * 0.28, textColor);
+    } else if (label) {
+      const t = this.add
+        .text(0, y, label, {
+          fontFamily: "'Fredoka',system-ui,sans-serif",
+          fontSize: `${fontSize}px`,
+          color: "#" + textColor.toString(16).padStart(6, "0"),
+          stroke: "#00000055",
+          strokeThickness: 2,
+        })
+        .setOrigin(0, 0.5);
+      const iconSize = Math.min(h * 0.32, 18);
+      const gap = icon ? iconSize * 2 + 8 : 0;
+      const totalW = t.width + gap;
+      const startX = x - totalW / 2;
+      if (icon) {
+        const ig = this.add.graphics();
+        drawIcon(ig, icon, startX + iconSize, y, iconSize, textColor);
+      }
+      t.setPosition(startX + gap, y);
+    }
+
     const hit = this.add.rectangle(x, y, w, h, 0x000000, 0).setInteractive({ useHandCursor: true });
     hit.on("pointerdown", onClick);
   }
