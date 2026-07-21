@@ -51,9 +51,9 @@ export class TitleScene extends Phaser.Scene {
 
     // Title
     const title = this.add
-      .text(width / 2, 130, "Sausage Dash!", {
+      .text(width / 2, 100, "Sausage Dash!", {
         fontFamily: "'Fredoka','Comic Sans MS',system-ui,sans-serif",
-        fontSize: "88px",
+        fontSize: "72px",
         color: "#ffffff",
         stroke: "#6a2a1a",
         strokeThickness: 10,
@@ -247,7 +247,7 @@ export class TitleScene extends Phaser.Scene {
     );
 
     this.add
-      .text(width / 2, height / 2 - 120, WORLDS[themeIdx]?.name ?? "", {
+      .text(width / 2, 178, WORLDS[themeIdx]?.name ?? "", {
         fontFamily: "'Fredoka',system-ui,sans-serif",
         fontSize: "28px",
         color: "#ffffff",
@@ -259,7 +259,7 @@ export class TitleScene extends Phaser.Scene {
     // Best score badge
     if (save.bestScore > 0) {
       this.add
-        .text(width / 2, 220, `Best: ${save.bestScore}`, {
+        .text(width / 2, 224, `Best: ${save.bestScore}`, {
           fontFamily: "'Fredoka',system-ui,sans-serif",
           fontSize: "26px",
           color: "#ffffff",
