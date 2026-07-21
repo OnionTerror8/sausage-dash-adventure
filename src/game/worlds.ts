@@ -12,6 +12,10 @@ export interface WorldTheme {
   hill: number;
   cloud: number;
   accent: number;
+  /** Score needed to reach this world's finish-line landmark and end the run. */
+  finishScore: number;
+  /** Friendly destination name shown on the world-complete celebration. */
+  landmark: string;
 }
 
 export const WORLDS: WorldTheme[] = [
@@ -24,6 +28,8 @@ export const WORLDS: WorldTheme[] = [
     hill: 0xffcf7a,
     cloud: 0xfff8e8,
     accent: 0xff7a59,
+    finishScore: 700,
+    landmark: "the Cookie Jar",
   },
   {
     id: "theme_picnic",
@@ -34,6 +40,8 @@ export const WORLDS: WorldTheme[] = [
     hill: 0x5ab84a,
     cloud: 0xffffff,
     accent: 0xff5f7a,
+    finishScore: 850,
+    landmark: "the Picnic Basket",
   },
   {
     id: "theme_camping",
@@ -44,6 +52,8 @@ export const WORLDS: WorldTheme[] = [
     hill: 0x4f7a3a,
     cloud: 0xf0f4ff,
     accent: 0xff8a3d,
+    finishScore: 1000,
+    landmark: "the Campfire S'mores",
   },
   {
     id: "theme_birthday",
@@ -54,6 +64,8 @@ export const WORLDS: WorldTheme[] = [
     hill: 0xf78dc0,
     cloud: 0xffffff,
     accent: 0x8a5cff,
+    finishScore: 1150,
+    landmark: "the Birthday Cake",
   },
   {
     id: "theme_rainbow",
@@ -64,6 +76,8 @@ export const WORLDS: WorldTheme[] = [
     hill: 0x7cc860,
     cloud: 0xffffff,
     accent: 0xff5fa0,
+    finishScore: 1300,
+    landmark: "the Pot of Gold",
   },
   {
     id: "theme_candy",
@@ -74,6 +88,8 @@ export const WORLDS: WorldTheme[] = [
     hill: 0xff70a8,
     cloud: 0xfff0ff,
     accent: 0x7ad0ff,
+    finishScore: 1500,
+    landmark: "the Candy Castle",
   },
 ];
 

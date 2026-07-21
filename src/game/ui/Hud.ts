@@ -8,8 +8,11 @@ import { GAME_WIDTH } from "../config";
 export class Hud {
   private coinsText: Phaser.GameObjects.Text;
   private scoreText: Phaser.GameObjects.Text;
+  private progressBar: Phaser.GameObjects.Graphics;
+  private progressAccent: number;
 
-  constructor(scene: Phaser.Scene, onPause: () => void) {
+  constructor(scene: Phaser.Scene, onPause: () => void, progressAccent = 0xffcf3a) {
+    this.progressAccent = progressAccent;
     scene.add.image(30, 30, "coin").setScale(1).setScrollFactor(0);
     this.coinsText = scene.add
       .text(56, 12, "0", {
@@ -32,6 +35,10 @@ export class Hud {
       .setOrigin(0.5, 0)
       .setScrollFactor(0);
 
+    // Journey progress toward this world's finish-line landmark.
+    this.progressBar = scene.add.graphics().setScrollFactor(0);
+    this.setProgress(0);
+
     const pw = 68;
     const px = GAME_WIDTH - pw / 2 - 16;
     const py = 40;
@@ -53,5 +60,21 @@ export class Hud {
 
   setScore(n: number) {
     this.scoreText.setText(String(n));
+  }
+
+  /** `fraction` is 0..1 progress toward the world's finish-line landmark. */
+  setProgress(fraction: number) {
+    const clamped = Math.max(0, Math.min(1, fraction));
+    const w = 220,
+      h = 14,
+      x = GAME_WIDTH / 2 - w / 2,
+      y = 56;
+    this.progressBar.clear();
+    this.progressBar.fillStyle(0xffffff, 0.5);
+    this.progressBar.fillRoundedRect(x, y, w, h, 7);
+    if (clamped > 0) {
+      this.progressBar.fillStyle(this.progressAccent, 1);
+      this.progressBar.fillRoundedRect(x, y, Math.max(h, w * clamped), h, 7);
+    }
   }
 }

@@ -9,6 +9,7 @@ export interface SaveData {
   totalCoins: number;
   bestScore: number;
   unlocked: string[]; // cosmetic ids
+  completedWorlds: string[]; // world ids finished at least once (Journey Mode)
   equipped: {
     hat?: string;
     face?: string;
@@ -25,6 +26,7 @@ const DEFAULT: SaveData = {
   totalCoins: 0,
   bestScore: 0,
   unlocked: ["hat_none", "face_smile", "trail_none", "theme_kitchen"],
+  completedWorlds: [],
   equipped: { hat: "hat_none", face: "face_smile", trail: "trail_none", theme: "theme_kitchen" },
   settings: { sound: true, music: true },
 };
@@ -40,7 +42,10 @@ export function loadSave(): SaveData {
       ...parsed,
       equipped: { ...DEFAULT.equipped, ...(parsed.equipped ?? {}) },
       settings: { ...DEFAULT.settings, ...(parsed.settings ?? {}) },
-      unlocked: Array.from(new Set([...(DEFAULT.unlocked), ...(parsed.unlocked ?? [])])),
+      unlocked: Array.from(new Set([...DEFAULT.unlocked, ...(parsed.unlocked ?? [])])),
+      completedWorlds: Array.from(
+        new Set([...DEFAULT.completedWorlds, ...(parsed.completedWorlds ?? [])]),
+      ),
     };
   } catch {
     return { ...DEFAULT };

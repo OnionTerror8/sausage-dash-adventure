@@ -14,7 +14,7 @@
 import Phaser from "phaser";
 import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, PLAYER, SPEED, POWERUP_COLOR } from "../config";
 import { loadSave, updateSave } from "../storage";
-import { getWorld, type WorldTheme } from "../worlds";
+import { getWorld, WORLDS, type WorldTheme } from "../worlds";
 import { SFX } from "../sfx";
 import { burst, floatText } from "../fx";
 import { Player } from "../entities/Player";
@@ -37,6 +37,7 @@ export class GameScene extends Phaser.Scene {
   private score = 0;
   private nextMilestone = 100;
   private paused = false;
+  private worldComplete = false;
 
   private layers: Phaser.GameObjects.TileSprite[] = [];
   private worldTheme: WorldTheme = getWorld();
@@ -53,6 +54,7 @@ export class GameScene extends Phaser.Scene {
     this.nextMilestone = 100;
     this.speed = SPEED.start;
     this.paused = false;
+    this.worldComplete = false;
     this.lastHitAt = -9999;
 
     this.buildBackground();
@@ -60,7 +62,7 @@ export class GameScene extends Phaser.Scene {
     this.player = new Player(this, save.equipped);
     this.spawner = new Spawner(this, this.difficulty);
     this.powerups = new PowerupManager(this, this.player);
-    this.hud = new Hud(this, () => this.togglePause());
+    this.hud = new Hud(this, () => this.togglePause(), this.worldTheme.accent);
 
     // Input
     this.input.on("pointerdown", () => this.tryJump());
@@ -158,12 +160,19 @@ export class GameScene extends Phaser.Scene {
     // Player physics
     this.player.update(dt, this.difficulty.elapsed, this.powerups.gravityScale);
 
-    // Score
+    // Score + journey progress toward this world's finish line
     this.score += Math.round(this.speed * dt * 0.1);
     this.hud.setScore(this.score);
+    this.hud.setProgress(this.score / this.worldTheme.finishScore);
     if (this.score >= this.nextMilestone) {
       this.celebrateMilestone();
       this.nextMilestone += 100;
+    }
+    if (this.score >= this.worldTheme.finishScore) {
+      this.worldComplete = true;
+      this.paused = true;
+      this.showWorldComplete();
+      return;
     }
 
     // Spawn
@@ -185,6 +194,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private togglePause() {
+    if (this.worldComplete) return;
     this.paused = !this.paused;
     if (this.paused) this.showPause();
     else this.hidePause();
@@ -316,6 +326,129 @@ export class GameScene extends Phaser.Scene {
     SFX.cheer();
     floatText(this, "Yay!", this.player.x, this.player.y - 70, 0xffd83a, 26);
     burst(this, this.player.x, this.player.y, 0xff9fd0, 14);
+  }
+
+  /** Journey Mode: reaching a world's finish line ends the run with a celebration
+   *  instead of scaling forever — banks coins, grants a finish bonus, auto-unlocks
+   *  the next world, and offers Play Again / Next World / Home. */
+  private showWorldComplete() {
+    this.player.celebrate();
+    SFX.cheer();
+    burst(this, this.player.x, this.player.y, this.worldTheme.accent, 30);
+    floatText(this, "Yay!", this.player.x, this.player.y - 70, 0xffd83a, 26);
+
+    const worldIdx = WORLDS.findIndex((w) => w.id === this.worldTheme.id);
+    const nextWorld = WORLDS[worldIdx + 1];
+    const FINISH_BONUS = 25;
+    const bankedCoins = this.runCoins;
+    const finalScore = this.score;
+
+    const saved = updateSave((d) => {
+      d.totalCoins += bankedCoins + FINISH_BONUS;
+      if (finalScore > d.bestScore) d.bestScore = finalScore;
+      if (!d.completedWorlds.includes(this.worldTheme.id)) {
+        d.completedWorlds.push(this.worldTheme.id);
+      }
+      if (nextWorld && !d.unlocked.includes(nextWorld.id)) {
+        d.unlocked.push(nextWorld.id);
+      }
+    });
+    this.runCoins = 0;
+    this.hud.setCoins(0);
+
+    const allWorldsDone = saved.completedWorlds.length === WORLDS.length;
+    this.drawWorldCompleteOverlay(nextWorld, FINISH_BONUS, allWorldsDone);
+  }
+
+  private drawWorldCompleteOverlay(
+    nextWorld: WorldTheme | undefined,
+    bonus: number,
+    allWorldsDone: boolean,
+  ) {
+    const w = GAME_WIDTH,
+      h = GAME_HEIGHT;
+    const c = this.add.container(0, 0).setScrollFactor(0).setDepth(1000);
+    const bg = this.add.graphics();
+    bg.fillStyle(0x000000, 0.45);
+    bg.fillRect(0, 0, w, h);
+    c.add(bg);
+    const panel = this.add.graphics();
+    panel.fillStyle(0xffffff, 0.98);
+    panel.fillRoundedRect(w / 2 - 260, h / 2 - 210, 520, 420, 24);
+    c.add(panel);
+
+    const headline = allWorldsDone ? "World Tour Champion!" : "You did it!";
+    const title = this.add
+      .text(w / 2, h / 2 - 160, headline, {
+        fontFamily: "'Fredoka',system-ui,sans-serif",
+        fontSize: "38px",
+        color: "#ff6a4a",
+        align: "center",
+        wordWrap: { width: 460 },
+      })
+      .setOrigin(0.5);
+    c.add(title);
+
+    const sub = this.add
+      .text(w / 2, h / 2 - 100, `You reached ${this.worldTheme.landmark}!`, {
+        fontFamily: "'Fredoka',system-ui,sans-serif",
+        fontSize: "24px",
+        color: "#333333",
+        align: "center",
+        wordWrap: { width: 460 },
+      })
+      .setOrigin(0.5);
+    c.add(sub);
+
+    const coinBadge = this.add.image(w / 2 - 30, h / 2 - 50, "coin").setScale(0.9);
+    c.add(coinBadge);
+    const coinLabel = this.add
+      .text(w / 2 + 4, h / 2 - 62, `+${bonus}`, {
+        fontFamily: "'Fredoka',system-ui,sans-serif",
+        fontSize: "26px",
+        color: "#e5a020",
+      })
+      .setOrigin(0, 0.5);
+    c.add(coinLabel);
+
+    const mkBtn = (y: number, label: string, color: number, cb: () => void) => {
+      const btn = this.add.graphics();
+      btn.fillStyle(color, 1);
+      btn.fillRoundedRect(w / 2 - 140, y - 32, 280, 64, 18);
+      c.add(btn);
+      const t = this.add
+        .text(w / 2, y, label, {
+          fontFamily: "'Fredoka',system-ui,sans-serif",
+          fontSize: "26px",
+          color: "#ffffff",
+          stroke: "#00000055",
+          strokeThickness: 2,
+        })
+        .setOrigin(0.5);
+      c.add(t);
+      const hit = this.add
+        .rectangle(w / 2, y, 280, 64, 0x000000, 0)
+        .setInteractive({ useHandCursor: true });
+      hit.on("pointerdown", () => {
+        SFX.click();
+        cb();
+      });
+      c.add(hit);
+    };
+
+    let y = h / 2 - 5;
+    mkBtn(y, "Play Again", 0x5fd07a, () => this.scene.restart());
+    y += 70;
+    if (nextWorld) {
+      mkBtn(y, "Next World", 0xff9fd0, () => {
+        updateSave((d) => {
+          d.equipped.theme = nextWorld.id;
+        });
+        this.scene.restart();
+      });
+      y += 70;
+    }
+    mkBtn(y, "Home", 0x66d6ff, () => this.scene.start("Title"));
   }
 
   // ---------- Autosave ----------
