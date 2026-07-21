@@ -10,6 +10,7 @@ import { drawSausage } from "../render";
 import { SFX } from "../sfx";
 import { floatText } from "../fx";
 import { drawIcon, type IconKind } from "../ui/icons";
+import { drawFaceSwatch, drawWorldSwatch } from "../ui/swatches";
 
 const TABS: { id: CosmeticKind; label: string; icon: IconKind }[] = [
   { id: "hat", label: "Hats", icon: "hat" },
@@ -157,12 +158,19 @@ export class WardrobeScene extends Phaser.Scene {
 
     const sw = this.add.graphics();
     const cy = y + 2;
-    sw.fillStyle(c.color ?? 0x999999, owned ? 1 : 0.4);
-    sw.fillRoundedRect(x - 30, cy - 18, 60, 36, 10);
-    if (c.color2) {
-      sw.fillStyle(c.color2, owned ? 1 : 0.4);
-      sw.fillRoundedRect(x - 10, cy - 10, 30, 22, 6);
+    if (c.kind === "face") {
+      drawFaceSwatch(sw, x, cy, c.id);
+    } else if (c.kind === "theme") {
+      drawWorldSwatch(sw, x, cy, 60, 36, c.id);
+    } else {
+      sw.fillStyle(c.color ?? 0x999999, 1);
+      sw.fillRoundedRect(x - 30, cy - 18, 60, 36, 10);
+      if (c.color2) {
+        sw.fillStyle(c.color2, 1);
+        sw.fillRoundedRect(x - 10, cy - 10, 30, 22, 6);
+      }
     }
+    sw.setAlpha(owned ? 1 : 0.4);
     if (!owned) {
       // Simple padlock hint — a locked cosmetic, not a threatening icon.
       const lock = this.add.graphics();

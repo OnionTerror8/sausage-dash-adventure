@@ -9,6 +9,7 @@ import { SFX } from "../sfx";
 import { HAPTICS } from "../haptics";
 import { burst, floatText } from "../fx";
 import { drawIcon, type IconKind } from "../ui/icons";
+import { drawFaceSwatch, drawWorldSwatch } from "../ui/swatches";
 
 const TABS: { id: CosmeticKind; label: string; icon: IconKind }[] = [
   { id: "hat", label: "Hats", icon: "hat" },
@@ -149,13 +150,20 @@ export class ShopScene extends Phaser.Scene {
         .setOrigin(0.5),
     );
 
-    // Swatch preview
+    // Swatch preview — faces/worlds get a real mini-preview since they have
+    // no single flat color; hats/trails keep the simple color-swatch look.
     const sw = this.add.graphics();
-    sw.fillStyle(c.color ?? 0x999999, 1);
-    sw.fillRoundedRect(-30, -14, 60, 40, 10);
-    if (c.color2) {
-      sw.fillStyle(c.color2, 1);
-      sw.fillRoundedRect(-10, -6, 30, 24, 6);
+    if (c.kind === "face") {
+      drawFaceSwatch(sw, 0, 6, c.id);
+    } else if (c.kind === "theme") {
+      drawWorldSwatch(sw, 0, 6, 60, 40, c.id);
+    } else {
+      sw.fillStyle(c.color ?? 0x999999, 1);
+      sw.fillRoundedRect(-30, -14, 60, 40, 10);
+      if (c.color2) {
+        sw.fillStyle(c.color2, 1);
+        sw.fillRoundedRect(-10, -6, 30, 24, 6);
+      }
     }
     tile.add(sw);
 
