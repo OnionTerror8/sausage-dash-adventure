@@ -106,8 +106,13 @@ export class Spawner {
     // Choose one thing per group so combos stay easy.
     const r = Math.random();
     if (r < 0.15) return this.spawnPowerup();
-    // Chill Mode: hazards never spawn — that probability slice becomes more coins instead.
-    if (!this.chillMode && r < 0.15 + SPAWN.hazardChance * 0.7) return this.spawnHazard();
+    // Chill Mode and the opening grace window both skip hazards entirely —
+    // that probability slice becomes more coins instead. Every run/world
+    // starts calm and confident, no matter how the dice would've rolled.
+    const inGrace = this.difficulty.elapsed < SPAWN.graceMs;
+    if (!this.chillMode && !inGrace && r < 0.15 + SPAWN.hazardChance * 0.7) {
+      return this.spawnHazard();
+    }
     return this.spawnCoinTrail();
   }
 

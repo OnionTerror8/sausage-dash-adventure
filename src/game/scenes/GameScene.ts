@@ -167,9 +167,12 @@ export class GameScene extends Phaser.Scene {
     // Player physics
     this.player.update(dt, this.difficulty.elapsed, this.powerups.gravityScale);
 
-    // Score + journey progress toward this world's finish line
-    this.score += Math.round(this.speed * dt * 0.1);
-    this.hud.setScore(this.score);
+    // Score + journey progress toward this world's finish line.
+    // Accumulate as a float — rounding each frame's tiny fractional gain
+    // (often < 0.5 at 60fps) before adding it up meant the score could go
+    // an entire run without ever incrementing. Round only for display/save.
+    this.score += this.speed * dt * 0.1;
+    this.hud.setScore(Math.round(this.score));
     this.hud.setProgress(this.score / this.worldTheme.finishScore);
     if (this.score >= this.nextMilestone) {
       this.celebrateMilestone();
@@ -357,7 +360,7 @@ export class GameScene extends Phaser.Scene {
     const nextWorld = WORLDS[worldIdx + 1];
     const FINISH_BONUS = 25;
     const bankedCoins = this.runCoins;
-    const finalScore = this.score;
+    const finalScore = Math.round(this.score);
 
     const saved = updateSave((d) => {
       d.totalCoins += bankedCoins + FINISH_BONUS;
@@ -476,9 +479,10 @@ export class GameScene extends Phaser.Scene {
 
   // ---------- Autosave ----------
   private commitRun() {
+    const finalScore = Math.round(this.score);
     updateSave((d) => {
       d.totalCoins += this.runCoins;
-      if (this.score > d.bestScore) d.bestScore = this.score;
+      if (finalScore > d.bestScore) d.bestScore = finalScore;
     });
     this.runCoins = 0;
   }

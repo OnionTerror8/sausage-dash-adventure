@@ -25,6 +25,7 @@ export const SPAWN = {
   hazardChance: 0.55, // vs coin cluster
   coinTrailLen: [3, 7] as [number, number],
   coinRainEveryMs: 22000,
+  graceMs: 4500, // every run/world opens hazard-free for this long, no matter what
 };
 
 export const POWERUPS = ["magnet", "superjump", "shield", "tiny", "balloon", "skates"] as const;
