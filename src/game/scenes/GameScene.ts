@@ -16,6 +16,7 @@ import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, PLAYER, SPEED, POWERUP_COLOR } from 
 import { loadSave, updateSave } from "../storage";
 import { getWorld, WORLDS, type WorldTheme } from "../worlds";
 import { SFX } from "../sfx";
+import { HAPTICS } from "../haptics";
 import { burst, floatText } from "../fx";
 import { Player } from "../entities/Player";
 import { Spawner, type Piece } from "../entities/Spawner";
@@ -291,6 +292,7 @@ export class GameScene extends Phaser.Scene {
       this.runCoins += value;
       this.hud.setCoins(this.runCoins);
       SFX.coin();
+      HAPTICS.coin();
       this.player.celebrateCoin();
       burst(this, p.x, p.y, 0xffe082, 10);
       floatText(this, `+${value}`, p.x, p.y - 20, 0xfff29a, 20);
@@ -319,6 +321,7 @@ export class GameScene extends Phaser.Scene {
       this.hud.setCoins(this.runCoins);
 
       SFX.ouch();
+      HAPTICS.hit();
       floatText(this, "Ouch!", this.player.x, this.player.y - 60, 0xff6060, 28);
       burst(this, p.x, p.y, p.hazardHot ? 0xffa040 : 0xa0e0ff, 16);
 

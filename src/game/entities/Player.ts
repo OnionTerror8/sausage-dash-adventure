@@ -8,6 +8,7 @@ import Phaser from "phaser";
 import { GROUND_Y, PLAYER } from "../config";
 import { drawSausage } from "../render";
 import { SFX } from "../sfx";
+import { HAPTICS } from "../haptics";
 import type { SaveData } from "../storage";
 
 export class Player {
@@ -61,6 +62,7 @@ export class Player {
     this.vy = PLAYER.jumpVelocity * boost;
     this.onGround = false;
     SFX.jump();
+    HAPTICS.jump();
     this.scene.tweens.add({
       targets: this.container,
       scaleX: 0.85,

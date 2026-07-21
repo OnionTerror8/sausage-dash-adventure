@@ -6,6 +6,7 @@ import Phaser from "phaser";
 import { loadSave, updateSave } from "../storage";
 import { byKind, type Cosmetic, type CosmeticKind } from "../cosmetics";
 import { SFX } from "../sfx";
+import { HAPTICS } from "../haptics";
 import { burst, floatText } from "../fx";
 import { drawIcon, type IconKind } from "../ui/icons";
 
@@ -194,6 +195,7 @@ export class ShopScene extends Phaser.Scene {
         d.unlocked.push(c.id);
       });
       SFX.cheer();
+      HAPTICS.purchase();
       // Purchase animation: a happy pop + sparkle burst right on the tile.
       this.tweens.add({
         targets: tile,
