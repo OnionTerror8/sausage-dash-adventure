@@ -27,9 +27,9 @@ export function drawFaceSwatch(
   g.lineStyle(2, 0x5a2a1a, 1);
   if (faceId === "face_grin") {
     g.fillStyle(0x5a2a1a, 1);
-    g.fillRoundedRect(x - 8, y + 3, 16, 6, 3);
+    g.fillEllipse(x, y + 6, 16, 10);
     g.fillStyle(0xffffff, 1);
-    g.fillRoundedRect(x - 6, y + 4, 12, 3, 1.5);
+    g.fillEllipse(x, y + 3, 12, 5);
   } else if (faceId === "face_wink") {
     g.fillStyle(0xffffff, 1);
     g.fillCircle(x - 7, y - 4, 5);

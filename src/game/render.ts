@@ -31,9 +31,13 @@ export function drawSausage(
   const mouth = scene.add.graphics();
   mouth.lineStyle(3, 0x5a2a1a, 1);
   if (face === "face_grin") {
-    mouth.strokeRoundedRect(-14, 6, 28, 10, 5);
+    // Wide open-mouth grin: a filled dark oval (not just a stroked outline)
+    // with a white "teeth" band reads as clearly happy at gameplay scale,
+    // instead of the old flat stroked bar that looked neutral/frowning.
+    mouth.fillStyle(0x5a2a1a, 1);
+    mouth.fillEllipse(0, 11, 26, 16);
     mouth.fillStyle(0xffffff, 1);
-    mouth.fillRoundedRect(-12, 8, 24, 4, 2);
+    mouth.fillEllipse(0, 6, 20, 8);
   } else if (face === "face_wink") {
     mouth.beginPath();
     mouth.arc(0, 8, 10, 0, Math.PI, false);
