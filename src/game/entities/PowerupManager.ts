@@ -38,6 +38,11 @@ export class PowerupManager {
   get magnetOn() {
     return this.active?.id === "magnet";
   }
+  /** Tiny shrinks the sausage visually — the hit radius should shrink to match,
+   *  so the powerup's implied "smaller = easier to dodge" is actually true. */
+  get hitboxScale() {
+    return this.active?.id === "tiny" ? 0.55 : 1;
+  }
   get shieldOn() {
     return this.active?.id === "shield";
   }

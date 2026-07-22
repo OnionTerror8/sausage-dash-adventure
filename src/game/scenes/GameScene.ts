@@ -190,23 +190,31 @@ export class GameScene extends Phaser.Scene {
     this.score += this.speed * dt * 0.1;
     this.hud.setScore(Math.round(this.score));
     this.hud.setProgress(this.score / this.worldTheme.finishScore);
-    if (this.score >= this.nextMilestone) {
-      this.celebrateMilestone();
-      this.nextMilestone += 100;
-    }
     if (this.score >= this.worldTheme.finishScore) {
       this.worldComplete = true;
       this.paused = true;
       this.showWorldComplete();
       return;
     }
+    // Skipped once the run is about to finish, so the milestone "Yay!" never
+    // stacks with the world-complete celebration in the same frame.
+    if (this.score >= this.nextMilestone) {
+      this.celebrateMilestone();
+      this.nextMilestone += 100;
+    }
 
     // Spawn
     this.spawner.tick(deltaMs);
 
     // Move pieces + collide
-    this.spawner.update(dt, this.speed, this.powerups.magnetOn, this.player.x, this.player.y, (p) =>
-      this.handleCollision(p),
+    this.spawner.update(
+      dt,
+      this.speed,
+      this.powerups.magnetOn,
+      this.player.x,
+      this.player.y,
+      (p) => this.handleCollision(p),
+      PLAYER.radius * this.powerups.hitboxScale,
     );
 
     // Power-up expiry + HUD timer

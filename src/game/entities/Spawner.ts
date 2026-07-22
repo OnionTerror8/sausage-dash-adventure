@@ -62,6 +62,7 @@ export class Spawner {
     px: number,
     py: number,
     onCollide: (p: Piece) => void,
+    playerRadius: number = PLAYER.radius,
   ) {
     for (let i = this.pieces.length - 1; i >= 0; i--) {
       const p = this.pieces[i];
@@ -79,7 +80,7 @@ export class Spawner {
 
       const dx = p.x - px,
         dy = p.y - py;
-      if (Math.hypot(dx, dy) < p.hitR + PLAYER.radius - 8) {
+      if (Math.hypot(dx, dy) < p.hitR + playerRadius - 8) {
         onCollide(p);
       }
 

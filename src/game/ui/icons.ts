@@ -79,9 +79,20 @@ export function drawIcon(
       break;
 
     case "shop":
-      g.fillRoundedRect(cx - s * 0.8, cy - s * 0.3, s * 1.6, s * 1.1, s * 0.2);
+      // A little cart — trapezoid basket + wheels + handle, unmistakable
+      // from "lock" (which is a rounded body + single centered shackle).
       g.beginPath();
-      g.arc(cx, cy - s * 0.3, s * 0.45, Math.PI, 0, false);
+      g.moveTo(cx - s * 0.9, cy - s * 0.5);
+      g.lineTo(cx + s * 0.9, cy - s * 0.5);
+      g.lineTo(cx + s * 0.6, cy + s * 0.35);
+      g.lineTo(cx - s * 0.6, cy + s * 0.35);
+      g.closePath();
+      g.fillPath();
+      g.fillCircle(cx - s * 0.35, cy + s * 0.85, s * 0.18);
+      g.fillCircle(cx + s * 0.35, cy + s * 0.85, s * 0.18);
+      g.beginPath();
+      g.moveTo(cx - s * 0.9, cy - s * 0.5);
+      g.lineTo(cx - s * 1.3, cy - s * 0.95);
       g.strokePath();
       break;
 
