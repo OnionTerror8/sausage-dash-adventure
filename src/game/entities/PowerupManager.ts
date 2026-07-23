@@ -11,7 +11,11 @@ import { floatText } from "../fx";
 import type { Player } from "./Player";
 
 export class PowerupManager {
-  private active: { id: PowerupId; until: number } | null = null;
+  // Tracks remaining duration rather than an absolute expiry timestamp, and
+  // is only ticked down from GameScene.update() (which itself skips entirely
+  // while paused) — so opening the Pause overlay can no longer burn through
+  // a powerup's duration in real time while nothing is happening on screen.
+  private active: { id: PowerupId; remainingMs: number } | null = null;
   private hudBar?: Phaser.GameObjects.Graphics;
 
   constructor(
@@ -51,7 +55,7 @@ export class PowerupManager {
     SFX.power();
     HAPTICS.powerup();
     if (this.active) this.end();
-    this.active = { id, until: this.scene.time.now + POWERUP_DURATION_MS[id] };
+    this.active = { id, remainingMs: POWERUP_DURATION_MS[id] };
     floatText(
       this.scene,
       id.toUpperCase() + "!",
@@ -75,17 +79,19 @@ export class PowerupManager {
     this.active = null;
   }
 
-  /** Checks expiry and redraws the HUD timer bar. Call once per frame. */
-  update() {
+  /** Ticks the active powerup down and redraws the HUD timer bar. Call once
+   *  per frame with the frame's deltaMs — never called while paused, so time
+   *  spent on the Pause overlay no longer counts against the duration. */
+  update(deltaMs: number) {
     if (!this.active) return;
-    const now = this.scene.time.now;
-    if (now > this.active.until) {
+    this.active.remainingMs -= deltaMs;
+    if (this.active.remainingMs <= 0) {
       this.end();
       return;
     }
     if (!this.hudBar) return;
     const total = POWERUP_DURATION_MS[this.active.id];
-    const remain = Math.max(0, this.active.until - now) / total;
+    const remain = this.active.remainingMs / total;
     this.hudBar.clear();
     this.hudBar.fillStyle(0xffffff, 0.5);
     this.hudBar.fillRoundedRect(20, 80, 220, 18, 8);

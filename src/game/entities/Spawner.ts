@@ -68,7 +68,13 @@ export class Spawner {
       const p = this.pieces[i];
       p.x -= speed * dt;
 
-      if (magnetOn && (p.kind === "coin" || p.kind === "star" || p.kind === "bean")) {
+      const magnetable =
+        p.kind === "coin" ||
+        p.kind === "star" ||
+        p.kind === "bean" ||
+        p.kind === "ketchup" ||
+        p.kind === "balloon";
+      if (magnetOn && magnetable) {
         const dx = px - p.x,
           dy = py - p.y;
         const d = Math.hypot(dx, dy);
@@ -153,6 +159,19 @@ export class Spawner {
     const x = GAME_WIDTH + 100;
     const y = GROUND_Y - 30 + (def.yOffset ?? 0);
     this.makePiece(x, y, "hazard", { hazardId: def.id });
+
+    // Once every hazard type is unlocked, occasionally pair a second, different
+    // hazard well behind the first — a fresh dodge *pattern* for longer runs
+    // rather than a new type or a harsher one, so pacing stays gentle.
+    if (Math.random() < this.difficulty.hazardPairChance) {
+      const def2 = pickRandomHazard(
+        Math.random() < 0.5 ? "hot" : "cold",
+        this.difficulty.hazardVariety,
+      );
+      const x2 = x + 220;
+      const y2 = GROUND_Y - 30 + (def2.yOffset ?? 0);
+      this.makePiece(x2, y2, "hazard", { hazardId: def2.id });
+    }
   }
 
   private spawnPowerup() {

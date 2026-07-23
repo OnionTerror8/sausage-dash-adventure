@@ -9,6 +9,7 @@ import { byKind, type Cosmetic, type CosmeticKind } from "../cosmetics";
 import { drawSausage } from "../render";
 import { getWorld } from "../worlds";
 import { SFX, setSfxPitch } from "../sfx";
+import { MUSIC } from "../music";
 import { floatText } from "../fx";
 import { drawIcon, type IconKind } from "../ui/icons";
 import { drawFaceSwatch, drawWorldSwatch } from "../ui/swatches";
@@ -37,6 +38,7 @@ export class WardrobeScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const save = loadSave();
     setSfxPitch(getWorld(save.equipped.theme).pitchMultiplier);
+    MUSIC.setPitch(getWorld(save.equipped.theme).pitchMultiplier);
 
     const bg = this.add.graphics();
     bg.fillGradientStyle(0xd0f0ff, 0xd0f0ff, 0xffe0f0, 0xffe0f0, 1);
@@ -207,7 +209,8 @@ export class WardrobeScene extends Phaser.Scene {
       SFX.click();
       if (equipped) return;
       if (!owned) {
-        floatText(this, "Find it in the Shop!", x, y - 10, 0x888888, 16);
+        const hint = c.kind === "theme" ? "Finish a world to unlock it!" : "Find it in the Shop!";
+        floatText(this, hint, x, y - 10, 0x888888, 16);
         return;
       }
       updateSave((d) => {

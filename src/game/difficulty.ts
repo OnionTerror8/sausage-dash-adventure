@@ -16,13 +16,19 @@ export interface DifficultyTier {
   hazardVariety: number;
   /** Coin trail length range for this tier. */
   coinTrailLen: [number, number];
+  /** Chance a hazard spawn brings a second, different hazard alongside it —
+   *  once all 5 hazard types are unlocked, this keeps the back half of a
+   *  longer run feeling fresh via new *patterns* rather than raw new types
+   *  or higher raw difficulty (variety, not punishment). */
+  hazardPairChance: number;
 }
 
 export const DIFFICULTY_TIERS: DifficultyTier[] = [
-  { atMs: 0, hazardVariety: 2, coinTrailLen: [3, 4] },
-  { atMs: 15000, hazardVariety: 3, coinTrailLen: [3, 5] },
-  { atMs: 40000, hazardVariety: 4, coinTrailLen: [4, 6] },
-  { atMs: 70000, hazardVariety: 5, coinTrailLen: SPAWN.coinTrailLen },
+  { atMs: 0, hazardVariety: 2, coinTrailLen: [3, 4], hazardPairChance: 0 },
+  { atMs: 15000, hazardVariety: 3, coinTrailLen: [3, 5], hazardPairChance: 0 },
+  { atMs: 40000, hazardVariety: 4, coinTrailLen: [4, 6], hazardPairChance: 0 },
+  { atMs: 70000, hazardVariety: 5, coinTrailLen: SPAWN.coinTrailLen, hazardPairChance: 0 },
+  { atMs: 100000, hazardVariety: 5, coinTrailLen: SPAWN.coinTrailLen, hazardPairChance: 0.35 },
 ];
 
 export class DifficultyManager {
@@ -52,6 +58,11 @@ export class DifficultyManager {
   /** Coin trails get a little longer/richer over time. */
   get coinTrailLen(): [number, number] {
     return this.tier.coinTrailLen;
+  }
+
+  /** See DifficultyTier.hazardPairChance. */
+  get hazardPairChance() {
+    return this.tier.hazardPairChance;
   }
 
   /** Base forward speed — ramps slowly and is capped, never spikes. */

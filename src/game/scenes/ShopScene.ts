@@ -5,8 +5,9 @@
 import Phaser from "phaser";
 import { loadSave, updateSave } from "../storage";
 import { byKind, type Cosmetic, type CosmeticKind } from "../cosmetics";
-import { getWorld } from "../worlds";
+import { getWorld, WORLDS } from "../worlds";
 import { SFX, setSfxPitch } from "../sfx";
+import { MUSIC } from "../music";
 import { HAPTICS } from "../haptics";
 import { burst, floatText } from "../fx";
 import { drawIcon, type IconKind } from "../ui/icons";
@@ -34,6 +35,7 @@ export class ShopScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const save = loadSave();
     setSfxPitch(getWorld(save.equipped.theme).pitchMultiplier);
+    MUSIC.setPitch(getWorld(save.equipped.theme).pitchMultiplier);
 
     const bg = this.add.graphics();
     bg.fillGradientStyle(0xfff2c0, 0xfff2c0, 0xffd0e5, 0xffd0e5, 1);
@@ -131,6 +133,15 @@ export class ShopScene extends Phaser.Scene {
 
   private drawTile(x: number, y: number, c: Cosmetic, save: ReturnType<typeof loadSave>) {
     const owned = save.unlocked.includes(c.id);
+    // World themes beyond the first are meant to be reached by finishing the
+    // previous world's Journey, not bought ahead of it — otherwise a child
+    // can coin-buy straight into World 3 without ever completing World 1.
+    let journeyLocked = false;
+    if (c.kind === "theme" && !owned) {
+      const idx = WORLDS.findIndex((w) => w.id === c.id);
+      const prevWorld = WORLDS[idx - 1];
+      journeyLocked = !!prevWorld && !save.completedWorlds.includes(prevWorld.id);
+    }
 
     const w = 160;
     const h = 140;
@@ -170,8 +181,14 @@ export class ShopScene extends Phaser.Scene {
     tile.add(sw);
 
     // Action label — owned items are just labeled, not interactive here.
-    const label = owned ? "Owned" : `Buy ${c.price}`;
-    const color = owned ? 0x66cc66 : save.totalCoins >= c.price ? 0xffcf3a : 0xcccccc;
+    const label = owned ? "Owned" : journeyLocked ? "Locked" : `Buy ${c.price}`;
+    const color = owned
+      ? 0x66cc66
+      : journeyLocked
+        ? 0xcccccc
+        : save.totalCoins >= c.price
+          ? 0xffcf3a
+          : 0xcccccc;
 
     const btn = this.add.graphics();
     btn.fillStyle(color, 1);
@@ -181,10 +198,14 @@ export class ShopScene extends Phaser.Scene {
       const check = this.add.graphics();
       drawIcon(check, "check", -34, h / 2 - 24, 10, 0xffffff);
       tile.add(check);
+    } else if (journeyLocked) {
+      const lock = this.add.graphics();
+      drawIcon(lock, "lock", -34, h / 2 - 24, 10, 0xffffff);
+      tile.add(lock);
     }
     tile.add(
       this.add
-        .text(owned ? 10 : 0, h / 2 - 24, label, {
+        .text(owned || journeyLocked ? 10 : 0, h / 2 - 24, label, {
           fontFamily: "'Fredoka',system-ui,sans-serif",
           fontSize: "18px",
           color: "#ffffff",
@@ -199,6 +220,10 @@ export class ShopScene extends Phaser.Scene {
     const hit = this.add.rectangle(x, y, w, h, 0x000000, 0).setInteractive({ useHandCursor: true });
     hit.on("pointerdown", () => {
       SFX.click();
+      if (journeyLocked) {
+        floatText(this, "Finish the world before this one!", x, y - h / 2 - 10, 0x888888, 15);
+        return;
+      }
       if (save.totalCoins < c.price) return;
       updateSave((d) => {
         d.totalCoins -= c.price;

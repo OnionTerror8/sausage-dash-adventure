@@ -16,6 +16,7 @@ import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, PLAYER, SPEED, POWERUP_COLOR } from 
 import { loadSave, updateSave } from "../storage";
 import { getWorld, WORLDS, type WorldTheme } from "../worlds";
 import { SFX, setSfxPitch } from "../sfx";
+import { MUSIC } from "../music";
 import { HAPTICS } from "../haptics";
 import { burst, floatText } from "../fx";
 import { Player } from "../entities/Player";
@@ -34,7 +35,10 @@ export class GameScene extends Phaser.Scene {
   private hud!: Hud;
 
   private speed = SPEED.start;
-  private lastHitAt = -9999;
+  // Counts down in update() (never reached while paused), instead of comparing
+  // against an absolute this.time.now timestamp — so real time spent on the
+  // Pause overlay no longer eats into the post-hit invulnerability window.
+  private invulnRemainingMs = 0;
 
   private runCoins = 0;
   private score = 0;
@@ -53,13 +57,14 @@ export class GameScene extends Phaser.Scene {
     const save = loadSave();
     this.worldTheme = getWorld(save.equipped.theme);
     setSfxPitch(this.worldTheme.pitchMultiplier);
+    MUSIC.setPitch(this.worldTheme.pitchMultiplier);
     this.runCoins = 0;
     this.score = 0;
     this.nextMilestone = 100;
     this.speed = SPEED.start;
     this.paused = false;
     this.worldComplete = false;
-    this.lastHitAt = -9999;
+    this.invulnRemainingMs = 0;
 
     this.buildBackground();
     this.difficulty = new DifficultyManager();
@@ -170,6 +175,7 @@ export class GameScene extends Phaser.Scene {
     if (this.paused) return;
     const dt = deltaMs / 1000;
     this.difficulty.update(deltaMs);
+    if (this.invulnRemainingMs > 0) this.invulnRemainingMs -= deltaMs;
 
     // Difficulty ramp (speed/spawn-gap math lives in DifficultyManager)
     this.speed = this.difficulty.speed * this.powerups.speedMultiplier;
@@ -218,7 +224,7 @@ export class GameScene extends Phaser.Scene {
     );
 
     // Power-up expiry + HUD timer
-    this.powerups.update();
+    this.powerups.update(deltaMs);
   }
 
   // ---------- Actions ----------
@@ -345,8 +351,8 @@ export class GameScene extends Phaser.Scene {
         this.spawner.remove(p);
         return;
       }
-      if (this.time.now - this.lastHitAt < PLAYER.invulnMs) return;
-      this.lastHitAt = this.time.now;
+      if (this.invulnRemainingMs > 0) return;
+      this.invulnRemainingMs = PLAYER.invulnMs;
 
       const loss = Math.min(PLAYER.hitCoinLoss, this.runCoins);
       this.runCoins = Math.max(0, this.runCoins - loss);

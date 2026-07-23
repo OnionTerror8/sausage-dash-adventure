@@ -22,6 +22,7 @@ export class TitleScene extends Phaser.Scene {
     MUSIC.setMuted(!save.settings.music);
     const world = getWorld(save.equipped.theme);
     setSfxPitch(world.pitchMultiplier);
+    MUSIC.setPitch(world.pitchMultiplier);
     const { width, height } = this.scale;
 
     // Sky

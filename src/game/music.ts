@@ -20,14 +20,21 @@ const ROOT_HZ = 261.63; // C4
 const NOTE_MS = 260;
 const NOTE_GAIN = 0.045;
 
-function noteFreq(semitone: number) {
-  return ROOT_HZ * Math.pow(2, semitone / 12);
-}
-
 class MusicManager {
   private muted = true;
   private playing = false;
   private timer: ReturnType<typeof setTimeout> | null = null;
+  // Same per-world frequency multiplier sfx.ts uses, so the ambient music —
+  // not just one-off coin/jump/hit tones — also sounds distinct per theme.
+  private pitch = 1;
+
+  private noteFreq(semitone: number) {
+    return ROOT_HZ * this.pitch * Math.pow(2, semitone / 12);
+  }
+
+  setPitch(multiplier: number) {
+    this.pitch = multiplier;
+  }
 
   setMuted(m: boolean) {
     this.muted = m;
@@ -63,7 +70,7 @@ class MusicManager {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "triangle";
-      osc.frequency.value = noteFreq(semitone);
+      osc.frequency.value = this.noteFreq(semitone);
       gain.gain.setValueAtTime(0.0001, startAt);
       gain.gain.exponentialRampToValueAtTime(NOTE_GAIN, startAt + 0.03);
       gain.gain.exponentialRampToValueAtTime(0.0001, endAt - 0.02);
