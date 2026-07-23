@@ -5,25 +5,29 @@
  */
 import Phaser from "phaser";
 import { loadSave, updateSave } from "../storage";
-import { byKind, type Cosmetic, type CosmeticKind } from "../cosmetics";
+import { byId, byKind, type Cosmetic, type CosmeticKind } from "../cosmetics";
 import { drawSausage } from "../render";
 import { getWorld } from "../worlds";
 import { SFX, setSfxPitch } from "../sfx";
 import { MUSIC } from "../music";
 import { floatText } from "../fx";
 import { drawIcon, type IconKind } from "../ui/icons";
-import { drawFaceSwatch, drawWorldSwatch } from "../ui/swatches";
+import { drawFaceSwatch, drawWorldSwatch, drawBankSwatch } from "../ui/swatches";
 
 const TABS: { id: CosmeticKind; label: string; icon: IconKind }[] = [
   { id: "hat", label: "Hats", icon: "hat" },
   { id: "face", label: "Faces", icon: "face" },
   { id: "trail", label: "Trails", icon: "sparkle" },
   { id: "theme", label: "Worlds", icon: "globe" },
+  { id: "bank", label: "Bank", icon: "bank" },
 ];
 
 export class WardrobeScene extends Phaser.Scene {
   private tab: CosmeticKind = "hat";
   private preview!: Phaser.GameObjects.Container;
+  // Avoids re-celebrating the same matching outfit combo on every redraw —
+  // only fires when the equipped hat/trail/theme combo actually changes.
+  private lastColorMatchKey = "";
 
   constructor() {
     super("Wardrobe");
@@ -100,14 +104,16 @@ export class WardrobeScene extends Phaser.Scene {
       ease: "sine.inOut",
     });
 
-    // Tabs
+    // Tabs — centered gap-based layout so an extra tab (Bank) stays clear
+    // of the screen edges.
+    const tabGap = 128;
     TABS.forEach((t, i) => {
-      const x = 140 + i * 180;
+      const x = width / 2 - (tabGap * (TABS.length - 1)) / 2 + i * tabGap;
       const active = t.id === this.tab;
       this.button(
         x,
         260,
-        160,
+        122,
         54,
         active ? 0xff9f5f : 0xffffff,
         t.label,
@@ -116,7 +122,7 @@ export class WardrobeScene extends Phaser.Scene {
           this.tab = t.id;
           this.drawAll();
         },
-        22,
+        18,
         active ? 0xffffff : 0x333333,
         t.icon,
       );
@@ -142,7 +148,8 @@ export class WardrobeScene extends Phaser.Scene {
       (c.kind === "hat" && save.equipped.hat === c.id) ||
       (c.kind === "face" && save.equipped.face === c.id) ||
       (c.kind === "trail" && save.equipped.trail === c.id) ||
-      (c.kind === "theme" && save.equipped.theme === c.id);
+      (c.kind === "theme" && save.equipped.theme === c.id) ||
+      (c.kind === "bank" && save.equipped.bank === c.id);
 
     const w = 160;
     const h = 130;
@@ -166,6 +173,8 @@ export class WardrobeScene extends Phaser.Scene {
       drawFaceSwatch(sw, x, cy, c.id);
     } else if (c.kind === "theme") {
       drawWorldSwatch(sw, x, cy, 60, 36, c.id);
+    } else if (c.kind === "bank") {
+      drawBankSwatch(sw, x, cy, c.id);
     } else {
       sw.fillStyle(c.color ?? 0x999999, 1);
       sw.fillRoundedRect(x - 30, cy - 18, 60, 36, 10);
@@ -218,17 +227,48 @@ export class WardrobeScene extends Phaser.Scene {
         if (c.kind === "face") d.equipped.face = c.id;
         if (c.kind === "trail") d.equipped.trail = c.id;
         if (c.kind === "theme") d.equipped.theme = c.id;
+        if (c.kind === "bank") d.equipped.bank = c.id;
       });
       SFX.cheer();
-      drawSausage(this, this.preview, loadSave().equipped);
+      const nowEquipped = loadSave().equipped;
+      drawSausage(this, this.preview, nowEquipped);
       this.tweens.add({
         targets: this.preview,
         scale: { from: 1.2, to: 1 },
         duration: 260,
         ease: "back.out",
       });
+      this.checkColorMatch(nowEquipped);
       this.drawAll();
     });
+  }
+
+  /** A small delight moment when hat/trail/theme all land in the same color
+   *  family — purely cosmetic, no gameplay effect, just encourages playful
+   *  outfit experimentation. Faces have no assigned color so aren't checked. */
+  private checkColorMatch(equipped: { hat?: string; trail?: string; theme?: string }) {
+    const hat = byId(equipped.hat ?? "");
+    const trail = byId(equipped.trail ?? "");
+    const theme = getWorld(equipped.theme);
+    if (!hat?.color || !trail?.color) return;
+
+    // Phaser Color's `.h` is hue as a 0..1 fraction — bucket into 8 slices
+    // (45 degrees each) so near-identical hues count as "the same family".
+    const bucket = (hex: number) => Math.floor(Phaser.Display.Color.ValueToColor(hex).h * 8);
+    const key = `${equipped.hat}|${equipped.trail}|${equipped.theme}`;
+    const match =
+      bucket(hat.color) === bucket(trail.color) && bucket(trail.color) === bucket(theme.accent);
+    if (match && key !== this.lastColorMatchKey) {
+      this.lastColorMatchKey = key;
+      floatText(this, "Matching outfit! ✨", this.preview.x, this.preview.y - 90, 0xffb0f0, 22);
+      this.tweens.add({
+        targets: this.preview,
+        angle: { from: -8, to: 8 },
+        yoyo: true,
+        repeat: 3,
+        duration: 120,
+      });
+    }
   }
 
   private button(

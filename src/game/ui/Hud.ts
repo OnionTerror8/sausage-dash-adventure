@@ -5,6 +5,7 @@
 import Phaser from "phaser";
 import { GAME_WIDTH } from "../config";
 import { drawIcon } from "./icons";
+import { drawBankSwatch } from "./swatches";
 
 export class Hud {
   private coinsText: Phaser.GameObjects.Text;
@@ -17,9 +18,11 @@ export class Hud {
     onPause: () => void,
     progressAccent = 0xffcf3a,
     chillMode = false,
+    bankId = "bank_jar",
   ) {
     this.progressAccent = progressAccent;
-    scene.add.image(30, 30, "coin").setScale(1).setScrollFactor(0);
+    const bank = scene.add.graphics().setScrollFactor(0);
+    drawBankSwatch(bank, 30, 30, bankId);
     this.coinsText = scene.add
       .text(56, 12, "0", {
         fontFamily: "'Fredoka',system-ui,sans-serif",

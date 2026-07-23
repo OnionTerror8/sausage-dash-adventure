@@ -3,7 +3,7 @@
  * Add an entry here to add a new shop item.
  */
 
-export type CosmeticKind = "hat" | "face" | "trail" | "theme";
+export type CosmeticKind = "hat" | "face" | "trail" | "theme" | "bank";
 
 export interface Cosmetic {
   id: string;
@@ -18,11 +18,32 @@ export const COSMETICS: Cosmetic[] = [
   // Hats
   { id: "hat_none", kind: "hat", name: "No Hat", price: 0 },
   { id: "hat_chef", kind: "hat", name: "Chef Hat", price: 50, color: 0xffffff },
-  { id: "hat_pirate", kind: "hat", name: "Pirate Hat", price: 80, color: 0x2a2a2a, color2: 0xffffff },
+  {
+    id: "hat_pirate",
+    kind: "hat",
+    name: "Pirate Hat",
+    price: 80,
+    color: 0x2a2a2a,
+    color2: 0xffffff,
+  },
   { id: "hat_cowboy", kind: "hat", name: "Cowboy Hat", price: 90, color: 0xb0763a },
   { id: "hat_crown", kind: "hat", name: "Crown", price: 150, color: 0xffd83a },
-  { id: "hat_birthday", kind: "hat", name: "Birthday Hat", price: 60, color: 0xff5faf, color2: 0x5fd0ff },
-  { id: "hat_viking", kind: "hat", name: "Viking Helmet", price: 120, color: 0xa0a0a8, color2: 0xf0e0a0 },
+  {
+    id: "hat_birthday",
+    kind: "hat",
+    name: "Birthday Hat",
+    price: 60,
+    color: 0xff5faf,
+    color2: 0x5fd0ff,
+  },
+  {
+    id: "hat_viking",
+    kind: "hat",
+    name: "Viking Helmet",
+    price: 120,
+    color: 0xa0a0a8,
+    color2: 0xf0e0a0,
+  },
   { id: "hat_dino", kind: "hat", name: "Dinosaur Hat", price: 130, color: 0x5fd07a },
   { id: "hat_beanie", kind: "hat", name: "Beanie", price: 40, color: 0x5faaff },
 
@@ -47,6 +68,18 @@ export const COSMETICS: Cosmetic[] = [
   { id: "theme_birthday", kind: "theme", name: "Birthday Party", price: 200 },
   { id: "theme_rainbow", kind: "theme", name: "Rainbow Meadow", price: 250 },
   { id: "theme_candy", kind: "theme", name: "Candy Kitchen", price: 300 },
+
+  // Coin-counter looks — purely visual, no gameplay effect.
+  { id: "bank_jar", kind: "bank", name: "Coin Jar", price: 0 },
+  { id: "bank_piggy", kind: "bank", name: "Piggy Bank", price: 80, color: 0xff9fc0 },
+  {
+    id: "bank_chest",
+    kind: "bank",
+    name: "Treasure Chest",
+    price: 150,
+    color: 0xb0763a,
+    color2: 0xffd83a,
+  },
 ];
 
 export const byKind = (k: CosmeticKind) => COSMETICS.filter((c) => c.kind === k);

@@ -10,6 +10,8 @@ import { drawSausage } from "../render";
 import { SFX, setSoundMuted, setSfxPitch } from "../sfx";
 import { MUSIC } from "../music";
 import { drawIcon, type IconKind } from "../ui/icons";
+import { drawWorldSwatch } from "../ui/swatches";
+import { floatText } from "../fx";
 
 export class TitleScene extends Phaser.Scene {
   constructor() {
@@ -257,6 +259,53 @@ export class TitleScene extends Phaser.Scene {
         strokeThickness: 4,
       })
       .setOrigin(0.5);
+
+    // Adventure map: a small row of world nodes on a connecting path, giving
+    // an at-a-glance view of Journey Mode progress and a direct way to jump
+    // to any unlocked world, alongside the quick prev/next arrows above.
+    const mapY = 344;
+    const nodeGap = 120;
+    const mapStartX = width / 2 - (nodeGap * (WORLDS.length - 1)) / 2;
+    const pathLine = this.add.graphics();
+    pathLine.lineStyle(5, 0xffffff, 0.5);
+    pathLine.beginPath();
+    pathLine.moveTo(mapStartX, mapY);
+    pathLine.lineTo(mapStartX + nodeGap * (WORLDS.length - 1), mapY);
+    pathLine.strokePath();
+
+    WORLDS.forEach((w, i) => {
+      const nx = mapStartX + i * nodeGap;
+      const unlocked = save.unlocked.includes(w.id);
+      const isCurrent = w.id === save.equipped.theme;
+
+      const node = this.add.graphics();
+      node.fillStyle(0xffffff, unlocked ? 1 : 0.6);
+      node.fillCircle(nx, mapY, 19);
+      if (unlocked) {
+        drawWorldSwatch(node, nx, mapY, 28, 17, w.id);
+      } else {
+        drawIcon(node, "lock", nx, mapY, 9, 0x999999);
+      }
+      if (isCurrent) {
+        node.lineStyle(3, 0xffd83a, 1);
+        node.strokeCircle(nx, mapY, 23);
+      }
+
+      const hit = this.add
+        .circle(nx, mapY, 23, 0x000000, 0)
+        .setInteractive({ useHandCursor: true });
+      hit.on("pointerdown", () => {
+        SFX.click();
+        if (!unlocked) {
+          floatText(this, "Finish a world to unlock this one!", nx, mapY - 40, 0x888888, 14);
+          return;
+        }
+        updateSave((d) => {
+          d.equipped.theme = w.id;
+        });
+        this.scene.restart();
+      });
+    });
 
     // Best score badge
     if (save.bestScore > 0) {

@@ -39,6 +39,13 @@ export class GameScene extends Phaser.Scene {
   // against an absolute this.time.now timestamp — so real time spent on the
   // Pause overlay no longer eats into the post-hit invulnerability window.
   private invulnRemainingMs = 0;
+  // Elapsed-time (not real-time) stamps of recent hazard hits, for the gentle
+  // rubber-band assist — a struggling player quietly gets a bit more grace
+  // rather than being told "easy mode on".
+  private recentHitElapsed: number[] = [];
+  // Tracks whether every special treat kind was collected at least once this
+  // run, for the "recipe card" full-clear reward on world completion.
+  private treatsCollected = { star: false, bean: false, ketchup: false, balloon: false };
 
   private runCoins = 0;
   private score = 0;
@@ -65,6 +72,8 @@ export class GameScene extends Phaser.Scene {
     this.paused = false;
     this.worldComplete = false;
     this.invulnRemainingMs = 0;
+    this.recentHitElapsed = [];
+    this.treatsCollected = { star: false, bean: false, ketchup: false, balloon: false };
 
     this.buildBackground();
     this.difficulty = new DifficultyManager();
@@ -76,6 +85,7 @@ export class GameScene extends Phaser.Scene {
       () => this.togglePause(),
       this.worldTheme.accent,
       save.settings.chillMode,
+      save.equipped.bank,
     );
 
     // Input
@@ -86,6 +96,104 @@ export class GameScene extends Phaser.Scene {
 
     // Cheerful entry
     this.cameras.main.flash(300, 255, 255, 255);
+
+    // Themed wipe-in: a colored curtain in this world's accent slides away to
+    // reveal the run, replacing an instant scene swap with a bit of ceremony.
+    const wipe = this.add
+      .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, this.worldTheme.accent, 1)
+      .setOrigin(0, 0)
+      .setScrollFactor(0)
+      .setDepth(2000);
+    this.tweens.add({
+      targets: wipe,
+      x: GAME_WIDTH,
+      duration: 450,
+      ease: "cubic.inOut",
+      onComplete: () => wipe.destroy(),
+    });
+
+    // First time this world's been played: a one-time title card before the
+    // run starts, giving it a moment of ceremony beyond the background
+    // just changing. Paused underneath exactly like the Pause overlay.
+    if (!save.seenWorldIntros.includes(this.worldTheme.id)) {
+      this.paused = true;
+      this.showWorldIntro();
+    }
+  }
+
+  private showWorldIntro() {
+    const w = GAME_WIDTH,
+      h = GAME_HEIGHT,
+      t = this.worldTheme;
+    const c = this.add.container(0, 0).setScrollFactor(0).setDepth(1000);
+    const bg = this.add.graphics();
+    bg.fillStyle(0x000000, 0.45);
+    bg.fillRect(0, 0, w, h);
+    c.add(bg);
+    const panel = this.add.graphics();
+    panel.fillStyle(0xffffff, 0.98);
+    panel.fillRoundedRect(w / 2 - 260, h / 2 - 170, 520, 340, 24);
+    c.add(panel);
+
+    const title = this.add
+      .text(w / 2, h / 2 - 110, t.name, {
+        fontFamily: "'Fredoka',system-ui,sans-serif",
+        fontSize: "40px",
+        color: "#ff6a4a",
+        align: "center",
+        wordWrap: { width: 460 },
+      })
+      .setOrigin(0.5);
+    c.add(title);
+
+    const sub = this.add
+      .text(w / 2, h / 2 - 55, `Race to ${t.landmark}!`, {
+        fontFamily: "'Fredoka',system-ui,sans-serif",
+        fontSize: "24px",
+        color: "#333333",
+        align: "center",
+        wordWrap: { width: 460 },
+      })
+      .setOrigin(0.5);
+    c.add(sub);
+
+    const y = h / 2 + 60;
+    const btn = this.add.graphics();
+    btn.fillStyle(0x5fd07a, 1);
+    btn.fillRoundedRect(w / 2 - 140, y - 32, 280, 64, 18);
+    c.add(btn);
+    const label = this.add
+      .text(0, y, "Let's Go!", {
+        fontFamily: "'Fredoka',system-ui,sans-serif",
+        fontSize: "28px",
+        color: "#ffffff",
+        stroke: "#00000055",
+        strokeThickness: 2,
+      })
+      .setOrigin(0, 0.5);
+    const iconSize = 20;
+    const gap = iconSize * 2 + 10;
+    const startX = w / 2 - (label.width + gap) / 2;
+    const icon = this.add.graphics();
+    drawIcon(icon, "play", startX + iconSize, y, iconSize, 0xffffff);
+    c.add(icon);
+    label.setPosition(startX + gap, y);
+    c.add(label);
+
+    const hit = this.add
+      .rectangle(w / 2, y, 280, 64, 0x000000, 0)
+      .setInteractive({ useHandCursor: true });
+    hit.on("pointerdown", () => {
+      SFX.click();
+      updateSave((d) => {
+        if (!d.seenWorldIntros.includes(this.worldTheme.id)) {
+          d.seenWorldIntros.push(this.worldTheme.id);
+        }
+      });
+      c.destroy();
+      this.paused = false;
+    });
+    c.add(hit);
   }
 
   // ---------- Setup ----------
@@ -329,6 +437,9 @@ export class GameScene extends Phaser.Scene {
                 : 1;
       this.runCoins += value;
       this.hud.setCoins(this.runCoins);
+      if (p.kind === "star" || p.kind === "bean" || p.kind === "ketchup" || p.kind === "balloon") {
+        this.treatsCollected[p.kind] = true;
+      }
       SFX.coin();
       HAPTICS.coin();
       this.player.celebrateCoin();
@@ -353,6 +464,17 @@ export class GameScene extends Phaser.Scene {
       }
       if (this.invulnRemainingMs > 0) return;
       this.invulnRemainingMs = PLAYER.invulnMs;
+
+      // Gentle rubber-band: two hazard hits within a short stretch quietly
+      // buys a longer invuln window and a brief hazard-free breather, so a
+      // rough patch doesn't spiral — no message, it just gets easier to recover.
+      const now = this.difficulty.elapsed;
+      this.recentHitElapsed = this.recentHitElapsed.filter((t) => now - t < 12000);
+      this.recentHitElapsed.push(now);
+      if (this.recentHitElapsed.length >= 2) {
+        this.invulnRemainingMs = PLAYER.invulnMs * 1.5;
+        this.spawner.grantAssist(4000);
+      }
 
       const loss = Math.min(PLAYER.hitCoinLoss, this.runCoins);
       this.runCoins = Math.max(0, this.runCoins - loss);
@@ -391,6 +513,10 @@ export class GameScene extends Phaser.Scene {
     const FINISH_BONUS = 25;
     const bankedCoins = this.runCoins;
     const finalScore = Math.round(this.score);
+    // Collecting every special treat kind in one run earns a themed "recipe
+    // card" — a reason to explore fully rather than just rush the finish line.
+    const fullClear = Object.values(this.treatsCollected).every(Boolean);
+    const newRecipeCard = fullClear;
 
     const saved = updateSave((d) => {
       d.totalCoins += bankedCoins + FINISH_BONUS;
@@ -401,21 +527,28 @@ export class GameScene extends Phaser.Scene {
       if (nextWorld && !d.unlocked.includes(nextWorld.id)) {
         d.unlocked.push(nextWorld.id);
       }
+      if (fullClear && !d.recipeCards.includes(this.worldTheme.id)) {
+        d.recipeCards.push(this.worldTheme.id);
+      }
     });
     this.runCoins = 0;
     this.hud.setCoins(0);
 
     const allWorldsDone = saved.completedWorlds.length === WORLDS.length;
-    this.drawWorldCompleteOverlay(nextWorld, FINISH_BONUS, allWorldsDone);
+    this.drawWorldCompleteOverlay(nextWorld, FINISH_BONUS, allWorldsDone, newRecipeCard);
   }
 
   private drawWorldCompleteOverlay(
     nextWorld: WorldTheme | undefined,
     bonus: number,
     allWorldsDone: boolean,
+    newRecipeCard: boolean,
   ) {
     const w = GAME_WIDTH,
       h = GAME_HEIGHT;
+    // Extra vertical room for the recipe-card note, so it doesn't collide
+    // with the coin badge above or the Play Again button below.
+    const noteOffset = newRecipeCard ? 40 : 0;
     const c = this.add.container(0, 0).setScrollFactor(0).setDepth(1000);
     const bg = this.add.graphics();
     bg.fillStyle(0x000000, 0.45);
@@ -423,7 +556,7 @@ export class GameScene extends Phaser.Scene {
     c.add(bg);
     const panel = this.add.graphics();
     panel.fillStyle(0xffffff, 0.98);
-    panel.fillRoundedRect(w / 2 - 260, h / 2 - 210, 520, 420, 24);
+    panel.fillRoundedRect(w / 2 - 260, h / 2 - 210, 520, 420 + noteOffset, 24);
     c.add(panel);
 
     const headline = allWorldsDone ? "World Tour Champion!" : "You did it!";
@@ -460,6 +593,19 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0, 0.5);
     c.add(coinLabel);
 
+    if (newRecipeCard) {
+      const cardNote = this.add
+        .text(w / 2, h / 2 - 15, "You found every treat — Recipe Card earned!", {
+          fontFamily: "'Fredoka',system-ui,sans-serif",
+          fontSize: "16px",
+          color: "#7ad030",
+          align: "center",
+          wordWrap: { width: 440 },
+        })
+        .setOrigin(0.5);
+      c.add(cardNote);
+    }
+
     const mkBtn = (y: number, label: string, color: number, icon: IconKind, cb: () => void) => {
       const btn = this.add.graphics();
       btn.fillStyle(color, 1);
@@ -492,7 +638,7 @@ export class GameScene extends Phaser.Scene {
       c.add(hit);
     };
 
-    let y = h / 2 - 5;
+    let y = h / 2 - 5 + noteOffset;
     mkBtn(y, "Play Again", 0x5fd07a, "replay", () => this.scene.restart());
     y += 70;
     if (nextWorld) {

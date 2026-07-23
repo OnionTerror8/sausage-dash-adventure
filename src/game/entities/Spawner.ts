@@ -32,12 +32,25 @@ export class Spawner {
   readonly pieces: Piece[] = [];
   private nextSpawn = 400;
   private nextCoinRain = SPAWN.coinRainEveryMs;
+  /** Elapsed-time deadline (DifficultyManager.elapsed) below which hazards are
+   *  skipped, same mechanism as the opening grace window — set by the gentle
+   *  rubber-band assist in GameScene when a player is getting hit a lot. */
+  private assistUntilElapsed = 0;
 
   constructor(
     private scene: Phaser.Scene,
     private difficulty: DifficultyManager,
     private chillMode = false,
   ) {}
+
+  /** Quietly gives hazard-free breathing room for `durationMs` of elapsed run
+   *  time — no on-screen message, just a softer spawn mix while it's active. */
+  grantAssist(durationMs: number) {
+    this.assistUntilElapsed = Math.max(
+      this.assistUntilElapsed,
+      this.difficulty.elapsed + durationMs,
+    );
+  }
 
   /** Advance spawn timers, creating new groups/coin-rain as they come due. */
   tick(deltaMs: number) {
@@ -116,7 +129,8 @@ export class Spawner {
     // Chill Mode and the opening grace window both skip hazards entirely —
     // that probability slice becomes more coins instead. Every run/world
     // starts calm and confident, no matter how the dice would've rolled.
-    const inGrace = this.difficulty.elapsed < SPAWN.graceMs;
+    const inGrace =
+      this.difficulty.elapsed < SPAWN.graceMs || this.difficulty.elapsed < this.assistUntilElapsed;
     if (!this.chillMode && !inGrace && r < 0.15 + SPAWN.hazardChance * 0.7) {
       return this.spawnHazard();
     }

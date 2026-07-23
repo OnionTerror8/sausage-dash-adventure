@@ -11,13 +11,14 @@ import { MUSIC } from "../music";
 import { HAPTICS } from "../haptics";
 import { burst, floatText } from "../fx";
 import { drawIcon, type IconKind } from "../ui/icons";
-import { drawFaceSwatch, drawWorldSwatch } from "../ui/swatches";
+import { drawFaceSwatch, drawWorldSwatch, drawBankSwatch } from "../ui/swatches";
 
 const TABS: { id: CosmeticKind; label: string; icon: IconKind }[] = [
   { id: "hat", label: "Hats", icon: "hat" },
   { id: "face", label: "Faces", icon: "face" },
   { id: "trail", label: "Trails", icon: "sparkle" },
   { id: "theme", label: "Worlds", icon: "globe" },
+  { id: "bank", label: "Bank", icon: "bank" },
 ];
 
 export class ShopScene extends Phaser.Scene {
@@ -95,14 +96,16 @@ export class ShopScene extends Phaser.Scene {
       "wardrobe",
     );
 
-    // Tabs
+    // Tabs — centered gap-based layout so an extra tab (Bank) doesn't run
+    // into the Dress Up button at the top right.
+    const tabGap = 128;
     TABS.forEach((t, i) => {
-      const x = 140 + i * 180;
+      const x = width / 2 - (tabGap * (TABS.length - 1)) / 2 + i * tabGap;
       const active = t.id === this.tab;
       this.button(
         x,
         110,
-        160,
+        122,
         54,
         active ? 0xff9f5f : 0xffffff,
         t.label,
@@ -111,7 +114,7 @@ export class ShopScene extends Phaser.Scene {
           this.tab = t.id;
           this.drawAll();
         },
-        22,
+        18,
         active ? 0xffffff : 0x333333,
         t.icon,
       );
@@ -170,6 +173,8 @@ export class ShopScene extends Phaser.Scene {
       drawFaceSwatch(sw, 0, 6, c.id);
     } else if (c.kind === "theme") {
       drawWorldSwatch(sw, 0, 6, 60, 40, c.id);
+    } else if (c.kind === "bank") {
+      drawBankSwatch(sw, 0, 6, c.id);
     } else {
       sw.fillStyle(c.color ?? 0x999999, 1);
       sw.fillRoundedRect(-30, -14, 60, 40, 10);

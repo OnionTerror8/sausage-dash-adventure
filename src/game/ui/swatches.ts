@@ -84,3 +84,36 @@ export function drawWorldSwatch(
   g.fillStyle(world.accent, 1);
   g.fillCircle(x - w / 2 + w * 0.25, y - h / 2 + h * 0.3, h * 0.16);
 }
+
+/** Mini preview of a coin-counter cosmetic (jar/piggy bank/treasure chest). */
+export function drawBankSwatch(
+  g: Phaser.GameObjects.Graphics,
+  x: number,
+  y: number,
+  bankId: string,
+) {
+  if (bankId === "bank_piggy") {
+    g.fillStyle(0xff9fc0, 1);
+    g.fillEllipse(x, y + 2, 32, 22);
+    g.fillTriangle(x + 10, y - 8, x + 18, y - 14, x + 16, y - 4);
+    g.fillCircle(x + 15, y, 3);
+    g.fillStyle(0xff6f9f, 1);
+    g.fillRect(x - 6, y - 10, 10, 3);
+  } else if (bankId === "bank_chest") {
+    g.fillStyle(0xb0763a, 1);
+    g.fillRoundedRect(x - 18, y - 4, 36, 18, 4);
+    g.fillStyle(0x8a5a2a, 1);
+    g.beginPath();
+    g.arc(x, y - 4, 18, Math.PI, 0, false);
+    g.strokePath();
+    g.fillStyle(0xffd83a, 1);
+    g.fillRect(x - 3, y - 6, 6, 6);
+  } else {
+    g.fillStyle(0xcdeffd, 0.9);
+    g.fillRoundedRect(x - 14, y - 12, 28, 26, 6);
+    g.fillStyle(0xaee3f7, 1);
+    g.fillRoundedRect(x - 16, y - 16, 32, 6, 3);
+    g.fillStyle(0xffd83a, 1);
+    g.fillCircle(x, y, 5);
+  }
+}

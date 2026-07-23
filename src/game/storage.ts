@@ -10,11 +10,14 @@ export interface SaveData {
   bestScore: number;
   unlocked: string[]; // cosmetic ids
   completedWorlds: string[]; // world ids finished at least once (Journey Mode)
+  seenWorldIntros: string[]; // world ids whose first-time intro card has been shown
+  recipeCards: string[]; // world ids where every special treat was collected in one run
   equipped: {
     hat?: string;
     face?: string;
     trail?: string;
     theme?: string; // world id
+    bank?: string; // coin-counter cosmetic id
   };
   settings: {
     sound: boolean;
@@ -26,9 +29,17 @@ export interface SaveData {
 const DEFAULT: SaveData = {
   totalCoins: 0,
   bestScore: 0,
-  unlocked: ["hat_none", "face_smile", "trail_none", "theme_kitchen"],
+  unlocked: ["hat_none", "face_smile", "trail_none", "theme_kitchen", "bank_jar"],
   completedWorlds: [],
-  equipped: { hat: "hat_none", face: "face_smile", trail: "trail_none", theme: "theme_kitchen" },
+  seenWorldIntros: [],
+  recipeCards: [],
+  equipped: {
+    hat: "hat_none",
+    face: "face_smile",
+    trail: "trail_none",
+    theme: "theme_kitchen",
+    bank: "bank_jar",
+  },
   settings: { sound: true, music: true, chillMode: false },
 };
 
@@ -47,6 +58,10 @@ export function loadSave(): SaveData {
       completedWorlds: Array.from(
         new Set([...DEFAULT.completedWorlds, ...(parsed.completedWorlds ?? [])]),
       ),
+      seenWorldIntros: Array.from(
+        new Set([...DEFAULT.seenWorldIntros, ...(parsed.seenWorldIntros ?? [])]),
+      ),
+      recipeCards: Array.from(new Set([...DEFAULT.recipeCards, ...(parsed.recipeCards ?? [])])),
     };
   } catch {
     return { ...DEFAULT };

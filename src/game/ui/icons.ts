@@ -24,7 +24,8 @@ export type IconKind =
   | "face"
   | "sparkle"
   | "globe"
-  | "shield";
+  | "shield"
+  | "bank";
 
 /** Draws an icon centered at (cx, cy). `s` is roughly the icon's half-size. */
 export function drawIcon(
@@ -211,6 +212,11 @@ export function drawIcon(
       g.lineTo(cx - s * 0.8, cy - s * 0.55);
       g.closePath();
       g.strokePath();
+      break;
+
+    case "bank":
+      g.fillRoundedRect(cx - s * 0.8, cy - s * 0.5, s * 1.6, s * 1.3, s * 0.25);
+      g.fillRect(cx - s * 0.9, cy - s * 0.8, s * 1.8, s * 0.3);
       break;
   }
 }
