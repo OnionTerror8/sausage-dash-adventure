@@ -24,6 +24,7 @@ const TABS: { id: CosmeticKind; label: string; icon: IconKind }[] = [
 
 export class WardrobeScene extends Phaser.Scene {
   private tab: CosmeticKind = "hat";
+  private page = 0;
   private preview!: Phaser.GameObjects.Container;
   // Avoids re-celebrating the same matching outfit combo on every redraw —
   // only fires when the equipped hat/trail/theme combo actually changes.
@@ -120,6 +121,7 @@ export class WardrobeScene extends Phaser.Scene {
         () => {
           SFX.click();
           this.tab = t.id;
+          this.page = 0;
           this.drawAll();
         },
         18,
@@ -128,18 +130,74 @@ export class WardrobeScene extends Phaser.Scene {
       );
     });
 
-    // Grid of items
+    // Grid of items — paginated so a category with more items than fit on
+    // screen never leaves any of them unreachable (previously items past the
+    // first row ran off the bottom of the canvas with no way to scroll).
     const items = byKind(this.tab);
     const cols = 4;
     const startX = 130;
     const startY = 350;
     const cellW = 180;
     const cellH = 150;
-    items.forEach((c, i) => {
+    const tileH = 130;
+    const maxRows = Math.max(1, Math.floor((height - startY - tileH / 2 - 10) / cellH) + 1);
+    const perPage = cols * maxRows;
+    const totalPages = Math.max(1, Math.ceil(items.length / perPage));
+    if (this.page >= totalPages) this.page = totalPages - 1;
+    const pageItems = items.slice(this.page * perPage, (this.page + 1) * perPage);
+
+    pageItems.forEach((c, i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
       this.drawTile(startX + col * cellW, startY + row * cellH, c, save);
     });
+
+    if (totalPages > 1) {
+      const pagerY = startY + (maxRows - 1) * cellH + tileH / 2 + 35;
+      this.button(
+        width / 2 - 70,
+        pagerY,
+        56,
+        40,
+        0xffffff,
+        "",
+        () => {
+          if (this.page > 0) {
+            SFX.click();
+            this.page -= 1;
+            this.drawAll();
+          }
+        },
+        20,
+        this.page > 0 ? 0x333333 : 0xcccccc,
+        "back",
+      );
+      this.add
+        .text(width / 2, pagerY, `${this.page + 1} / ${totalPages}`, {
+          fontFamily: "'Fredoka',system-ui,sans-serif",
+          fontSize: "18px",
+          color: "#333333",
+        })
+        .setOrigin(0.5);
+      this.button(
+        width / 2 + 70,
+        pagerY,
+        56,
+        40,
+        0xffffff,
+        "",
+        () => {
+          if (this.page < totalPages - 1) {
+            SFX.click();
+            this.page += 1;
+            this.drawAll();
+          }
+        },
+        20,
+        this.page < totalPages - 1 ? 0x333333 : 0xcccccc,
+        "forward",
+      );
+    }
   }
 
   private drawTile(x: number, y: number, c: Cosmetic, save: ReturnType<typeof loadSave>) {
