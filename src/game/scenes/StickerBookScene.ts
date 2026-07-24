@@ -12,6 +12,7 @@ import { HAZARDS } from "../obstacles";
 import { COSMETICS, type Cosmetic } from "../cosmetics";
 import { SFX, setSfxPitch } from "../sfx";
 import { MUSIC } from "../music";
+import { setVoicePitch } from "../voice";
 import { getWorld } from "../worlds";
 import { drawIcon, type IconKind } from "../ui/icons";
 import { drawFaceSwatch, drawWorldSwatch, drawBankSwatch } from "../ui/swatches";
@@ -39,6 +40,7 @@ export class StickerBookScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const save = loadSave();
     setSfxPitch(getWorld(save.equipped.theme).pitchMultiplier);
+    setVoicePitch(getWorld(save.equipped.theme).pitchMultiplier);
     MUSIC.setPitch(getWorld(save.equipped.theme).pitchMultiplier);
 
     const bg = this.add.graphics();

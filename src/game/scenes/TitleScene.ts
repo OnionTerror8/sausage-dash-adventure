@@ -9,6 +9,7 @@ import { byId, byKind } from "../cosmetics";
 import { drawSausage } from "../render";
 import { SFX, setSoundMuted, setSfxPitch } from "../sfx";
 import { MUSIC } from "../music";
+import { setVoiceMuted, setVoicePitch } from "../voice";
 import { drawIcon, type IconKind } from "../ui/icons";
 import { drawWorldSwatch } from "../ui/swatches";
 import { floatText } from "../fx";
@@ -21,9 +22,11 @@ export class TitleScene extends Phaser.Scene {
   create() {
     const save = loadSave();
     setSoundMuted(!save.settings.sound);
+    setVoiceMuted(!save.settings.sound);
     MUSIC.setMuted(!save.settings.music);
     const world = getWorld(save.equipped.theme);
     setSfxPitch(world.pitchMultiplier);
+    setVoicePitch(world.pitchMultiplier);
     MUSIC.setPitch(world.pitchMultiplier);
     const { width, height } = this.scale;
 
@@ -218,6 +221,7 @@ export class TitleScene extends Phaser.Scene {
           d.settings.sound = !d.settings.sound;
         });
         setSoundMuted(!d.settings.sound);
+        setVoiceMuted(!d.settings.sound);
         this.scene.restart();
       },
       18,

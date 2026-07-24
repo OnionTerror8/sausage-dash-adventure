@@ -8,6 +8,7 @@ import { byKind, type Cosmetic, type CosmeticKind } from "../cosmetics";
 import { getWorld, WORLDS } from "../worlds";
 import { SFX, setSfxPitch } from "../sfx";
 import { MUSIC } from "../music";
+import { setVoicePitch } from "../voice";
 import { HAPTICS } from "../haptics";
 import { burst, floatText } from "../fx";
 import { drawIcon, type IconKind } from "../ui/icons";
@@ -37,6 +38,7 @@ export class ShopScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const save = loadSave();
     setSfxPitch(getWorld(save.equipped.theme).pitchMultiplier);
+    setVoicePitch(getWorld(save.equipped.theme).pitchMultiplier);
     MUSIC.setPitch(getWorld(save.equipped.theme).pitchMultiplier);
 
     const bg = this.add.graphics();

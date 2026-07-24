@@ -9,6 +9,7 @@ import { byId, byKind, type Cosmetic, type CosmeticKind } from "../cosmetics";
 import { drawSausage } from "../render";
 import { getWorld } from "../worlds";
 import { SFX, setSfxPitch } from "../sfx";
+import { setVoicePitch } from "../voice";
 import { MUSIC } from "../music";
 import { floatText } from "../fx";
 import { drawIcon, type IconKind } from "../ui/icons";
@@ -43,6 +44,7 @@ export class WardrobeScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const save = loadSave();
     setSfxPitch(getWorld(save.equipped.theme).pitchMultiplier);
+    setVoicePitch(getWorld(save.equipped.theme).pitchMultiplier);
     MUSIC.setPitch(getWorld(save.equipped.theme).pitchMultiplier);
 
     const bg = this.add.graphics();

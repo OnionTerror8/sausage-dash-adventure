@@ -6,6 +6,7 @@
 import Phaser from "phaser";
 import { POWERUP_COLOR, POWERUP_DURATION_MS, type PowerupId } from "../config";
 import { SFX } from "../sfx";
+import { VOICE } from "../voice";
 import { HAPTICS } from "../haptics";
 import { floatText } from "../fx";
 import type { Player } from "./Player";
@@ -53,6 +54,7 @@ export class PowerupManager {
 
   activate(id: PowerupId) {
     SFX.power();
+    VOICE.bark("powerup");
     HAPTICS.powerup();
     if (this.active) this.end();
     this.active = { id, remainingMs: POWERUP_DURATION_MS[id] };

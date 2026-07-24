@@ -17,6 +17,7 @@ import { loadSave, updateSave } from "../storage";
 import { getWorld, WORLDS, type WorldTheme } from "../worlds";
 import { SFX, setSfxPitch } from "../sfx";
 import { MUSIC } from "../music";
+import { VOICE, setVoicePitch } from "../voice";
 import { HAPTICS } from "../haptics";
 import { burst, floatText } from "../fx";
 import { Player } from "../entities/Player";
@@ -68,6 +69,7 @@ export class GameScene extends Phaser.Scene {
     this.worldTheme = getWorld(save.equipped.theme);
     setSfxPitch(this.worldTheme.pitchMultiplier);
     MUSIC.setPitch(this.worldTheme.pitchMultiplier);
+    setVoicePitch(this.worldTheme.pitchMultiplier);
     this.runCoins = 0;
     this.score = 0;
     this.nextMilestone = 100;
@@ -493,6 +495,7 @@ export class GameScene extends Phaser.Scene {
       this.hud.setCoins(this.runCoins);
 
       SFX.ouch();
+      VOICE.bark(p.hazardHot ? "hurt" : "cold");
       HAPTICS.hit();
       floatText(this, "Ouch!", this.player.x, this.player.y - 60, 0xff6060, 28);
       burst(this, p.x, p.y, p.hazardHot ? 0xffa040 : 0xa0e0ff, 16);
@@ -507,6 +510,7 @@ export class GameScene extends Phaser.Scene {
   private celebrateMilestone() {
     this.player.celebrate();
     SFX.cheer();
+    VOICE.bark("cheer");
     floatText(this, "Yay!", this.player.x, this.player.y - 70, 0xffd83a, 26);
     burst(this, this.player.x, this.player.y, 0xff9fd0, 14);
   }
@@ -517,6 +521,7 @@ export class GameScene extends Phaser.Scene {
   private showWorldComplete() {
     this.player.celebrate();
     SFX.cheer();
+    VOICE.bark("cheer");
     burst(this, this.player.x, this.player.y, this.worldTheme.accent, 30);
     floatText(this, "Yay!", this.player.x, this.player.y - 70, 0xffd83a, 26);
 
