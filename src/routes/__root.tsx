@@ -78,10 +78,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Sausage Dash!" },
-      { name: "description", content: "A cheerful tap-to-jump runner for little kids." },
+      { name: "description", content: "Sausage Dash! is a bright, friendly endless-runner game for children aged 3–5. Tap to jump, collect coins, dodge hot and cold hazards — never a game over." },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Sausage Dash!" },
-      { property: "og:description", content: "A cheerful tap-to-jump runner for little kids." },
+      { property: "og:description", content: "Sausage Dash! is a bright, friendly endless-runner game for children aged 3–5. Tap to jump, collect coins, dodge hot and cold hazards — never a game over." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       // Lets a parent add the game to the home screen once — the child then
@@ -90,6 +90,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-title", content: "Sausage Dash!" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "twitter:title", content: "Sausage Dash!" },
+      { name: "twitter:description", content: "Sausage Dash! is a bright, friendly endless-runner game for children aged 3–5. Tap to jump, collect coins, dodge hot and cold hazards — never a game over." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/9a9a8b1e-a60d-4067-911d-04897ca2341d/id-preview-c757c770--7f16f8bd-4f29-44ce-ba1d-3020214ecacd.lovable.app-1784910346643.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/9a9a8b1e-a60d-4067-911d-04897ca2341d/id-preview-c757c770--7f16f8bd-4f29-44ce-ba1d-3020214ecacd.lovable.app-1784910346643.png" },
     ],
     links: [
       {

@@ -4,14 +4,14 @@ import { lazy, Suspense, useEffect, useState } from "react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Sausage Dash! — A cheerful runner for little kids" },
+      { title: "Sausage Dash!" },
       {
         name: "description",
         content:
           "Sausage Dash! is a bright, friendly endless-runner game for children aged 3–5. Tap to jump, collect coins, dodge hot and cold hazards — never a game over.",
       },
       { property: "og:title", content: "Sausage Dash!" },
-      { property: "og:description", content: "A cheerful tap-to-jump runner for little kids." },
+      { property: "og:description", content: "Sausage Dash! is a bright, friendly endless-runner game for children aged 3–5. Tap to jump, collect coins, dodge hot and cold hazards — never a game over." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
