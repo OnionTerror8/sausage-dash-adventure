@@ -15,11 +15,11 @@ import { MUSIC } from "../music";
 import { setVoicePitch } from "../voice";
 import { getWorld } from "../worlds";
 import { drawIcon, type IconKind } from "../ui/icons";
-import { drawFaceSwatch, drawWorldSwatch, drawBankSwatch } from "../ui/swatches";
+import { drawFaceSwatch, drawWorldSwatch, drawBankSwatch, drawFlatSwatch } from "../ui/swatches";
 
 type Tab = "hazards" | "cosmetics";
 const TABS: { id: Tab; label: string; icon: IconKind }[] = [
-  { id: "hazards", label: "Critters", icon: "shield" },
+  { id: "hazards", label: "Critters", icon: "critter" },
   { id: "cosmetics", label: "Outfits", icon: "hat" },
 ];
 
@@ -216,14 +216,7 @@ export class StickerBookScene extends Phaser.Scene {
       if (c.kind === "face") drawFaceSwatch(sw, x, y - 14, c.id);
       else if (c.kind === "theme") drawWorldSwatch(sw, x, y - 14, 46, 28, c.id);
       else if (c.kind === "bank") drawBankSwatch(sw, x, y - 14, c.id);
-      else {
-        sw.fillStyle(c.color ?? 0x999999, 1);
-        sw.fillRoundedRect(x - 23, y - 26, 46, 28, 8);
-        if (c.color2) {
-          sw.fillStyle(c.color2, 1);
-          sw.fillRoundedRect(x - 8, y - 20, 24, 16, 5);
-        }
-      }
+      else drawFlatSwatch(sw, x, y - 14, 46, 28, c.color, c.color2);
       this.add
         .text(x, y + h / 2 - 18, c.name, {
           fontFamily: "'Fredoka',system-ui,sans-serif",

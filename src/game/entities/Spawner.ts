@@ -222,7 +222,12 @@ export class Spawner {
       scene.tweens.add({ targets: img, angle: 360, repeat: -1, duration: 2000 });
       c.hitR = 24;
     } else if (kind === "bean") {
-      c.add(scene.add.image(0, 0, "jellybean").setTint(Phaser.Display.Color.RandomRGB().color));
+      // Brightness-floored, same as balloon below — an unbounded random tint
+      // occasionally lands on a dark/muddy tone that reads as dull rather
+      // than a fun candy color.
+      c.add(
+        scene.add.image(0, 0, "jellybean").setTint(Phaser.Display.Color.RandomRGB(120, 255).color),
+      );
     } else if (kind === "ketchup") {
       c.add(scene.add.image(0, 0, "ketchup"));
       c.hitR = 26;

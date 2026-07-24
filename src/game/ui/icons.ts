@@ -26,7 +26,8 @@ export type IconKind =
   | "globe"
   | "shield"
   | "bank"
-  | "book";
+  | "book"
+  | "critter";
 
 /** Draws an icon centered at (cx, cy). `s` is roughly the icon's half-size. */
 export function drawIcon(
@@ -235,6 +236,21 @@ export function drawIcon(
       g.moveTo(cx + s * 0.3, cy + s * 0.2);
       g.lineTo(cx + s * 0.8, cy + s * 0.2);
       g.strokePath();
+      break;
+
+    case "critter":
+      // A friendly blob-monster outline (little horns + dot eyes) — distinct
+      // from "shield" (which already means Chill Mode/protection elsewhere),
+      // so the Sticker Book's hazard-collection tab doesn't send a mixed signal.
+      g.strokeRoundedRect(cx - s * 0.85, cy - s * 0.5, s * 1.7, s * 1.3, s * 0.55);
+      g.beginPath();
+      g.moveTo(cx - s * 0.5, cy - s * 0.5);
+      g.lineTo(cx - s * 0.65, cy - s * 0.95);
+      g.moveTo(cx + s * 0.5, cy - s * 0.5);
+      g.lineTo(cx + s * 0.65, cy - s * 0.95);
+      g.strokePath();
+      g.fillCircle(cx - s * 0.28, cy - s * 0.05, s * 0.14);
+      g.fillCircle(cx + s * 0.28, cy - s * 0.05, s * 0.14);
       break;
   }
 }

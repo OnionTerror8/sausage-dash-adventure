@@ -13,7 +13,7 @@ import { setVoicePitch } from "../voice";
 import { MUSIC } from "../music";
 import { floatText } from "../fx";
 import { drawIcon, type IconKind } from "../ui/icons";
-import { drawFaceSwatch, drawWorldSwatch, drawBankSwatch } from "../ui/swatches";
+import { drawFaceSwatch, drawWorldSwatch, drawBankSwatch, drawFlatSwatch } from "../ui/swatches";
 
 const TABS: { id: CosmeticKind; label: string; icon: IconKind }[] = [
   { id: "hat", label: "Hats", icon: "hat" },
@@ -236,12 +236,7 @@ export class WardrobeScene extends Phaser.Scene {
     } else if (c.kind === "bank") {
       drawBankSwatch(sw, x, cy, c.id);
     } else {
-      sw.fillStyle(c.color ?? 0x999999, 1);
-      sw.fillRoundedRect(x - 30, cy - 18, 60, 36, 10);
-      if (c.color2) {
-        sw.fillStyle(c.color2, 1);
-        sw.fillRoundedRect(x - 10, cy - 10, 30, 22, 6);
-      }
+      drawFlatSwatch(sw, x, cy, 60, 36, c.color, c.color2);
     }
     sw.setAlpha(owned ? 1 : 0.4);
     if (!owned) {

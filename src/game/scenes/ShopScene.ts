@@ -12,7 +12,7 @@ import { setVoicePitch } from "../voice";
 import { HAPTICS } from "../haptics";
 import { burst, floatText } from "../fx";
 import { drawIcon, type IconKind } from "../ui/icons";
-import { drawFaceSwatch, drawWorldSwatch, drawBankSwatch } from "../ui/swatches";
+import { drawFaceSwatch, drawWorldSwatch, drawBankSwatch, drawFlatSwatch } from "../ui/swatches";
 
 const TABS: { id: CosmeticKind; label: string; icon: IconKind }[] = [
   { id: "hat", label: "Hats", icon: "hat" },
@@ -236,12 +236,7 @@ export class ShopScene extends Phaser.Scene {
     } else if (c.kind === "bank") {
       drawBankSwatch(sw, 0, 6, c.id);
     } else {
-      sw.fillStyle(c.color ?? 0x999999, 1);
-      sw.fillRoundedRect(-30, -14, 60, 40, 10);
-      if (c.color2) {
-        sw.fillStyle(c.color2, 1);
-        sw.fillRoundedRect(-10, -6, 30, 24, 6);
-      }
+      drawFlatSwatch(sw, 0, 6, 60, 40, c.color, c.color2);
     }
     tile.add(sw);
 

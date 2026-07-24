@@ -12,6 +12,7 @@ import { MUSIC } from "../music";
 import { setVoiceMuted, setVoicePitch } from "../voice";
 import { drawIcon, type IconKind } from "../ui/icons";
 import { drawWorldSwatch } from "../ui/swatches";
+import { drawBgMotif } from "../bgshapes";
 import { floatText } from "../fx";
 
 export class TitleScene extends Phaser.Scene {
@@ -305,6 +306,10 @@ export class TitleScene extends Phaser.Scene {
       node.fillCircle(nx, mapY, 19);
       if (unlocked) {
         drawWorldSwatch(node, nx, mapY, 28, 17, w.id);
+        // A tiny per-world motif on top of the color swatch, so nodes are
+        // recognizable by shape too — six same-shaped color dots read as
+        // "some colored dots", not "six distinct places".
+        drawBgMotif(node, w.bgMotif, nx, mapY - 2, 7, w.accent);
       } else {
         drawIcon(node, "lock", nx, mapY, 9, 0x999999);
       }
