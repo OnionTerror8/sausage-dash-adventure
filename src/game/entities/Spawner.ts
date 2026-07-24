@@ -25,6 +25,7 @@ export interface Piece extends Phaser.GameObjects.Container {
   kind: Kind;
   power?: PowerupId;
   hazardHot?: boolean;
+  hazardId?: string;
   hitR: number;
 }
 
@@ -242,6 +243,7 @@ export class Spawner {
     } else if (kind === "hazard") {
       const def = getHazardById(opts.hazardId!);
       c.hazardHot = def.group === "hot";
+      c.hazardId = def.id;
       const img = scene.add.image(0, 0, def.textureKey);
       c.add(img);
       c.hitR = def.hitR;

@@ -12,6 +12,7 @@ export interface SaveData {
   completedWorlds: string[]; // world ids finished at least once (Journey Mode)
   seenWorldIntros: string[]; // world ids whose first-time intro card has been shown
   recipeCards: string[]; // world ids where every special treat was collected in one run
+  metHazards: string[]; // hazard ids ever collided with — fuel for the Sticker Book
   equipped: {
     hat?: string;
     face?: string;
@@ -33,6 +34,7 @@ const DEFAULT: SaveData = {
   completedWorlds: [],
   seenWorldIntros: [],
   recipeCards: [],
+  metHazards: [],
   equipped: {
     hat: "hat_none",
     face: "face_smile",
@@ -62,6 +64,7 @@ export function loadSave(): SaveData {
         new Set([...DEFAULT.seenWorldIntros, ...(parsed.seenWorldIntros ?? [])]),
       ),
       recipeCards: Array.from(new Set([...DEFAULT.recipeCards, ...(parsed.recipeCards ?? [])])),
+      metHazards: Array.from(new Set([...DEFAULT.metHazards, ...(parsed.metHazards ?? [])])),
     };
   } catch {
     return { ...DEFAULT };

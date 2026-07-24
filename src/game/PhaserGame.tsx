@@ -18,6 +18,7 @@ export function PhaserGame() {
       const { GameScene } = await import("./scenes/GameScene");
       const { ShopScene } = await import("./scenes/ShopScene");
       const { WardrobeScene } = await import("./scenes/WardrobeScene");
+      const { StickerBookScene } = await import("./scenes/StickerBookScene");
       const { GAME_WIDTH, GAME_HEIGHT } = await import("./config");
       if (cancelled || !containerRef.current) return;
 
@@ -36,7 +37,7 @@ export function PhaserGame() {
           // CSS own it exclusively.
           autoCenter: Phaser.Scale.NO_CENTER,
         },
-        scene: [BootScene, TitleScene, GameScene, ShopScene, WardrobeScene],
+        scene: [BootScene, TitleScene, GameScene, ShopScene, WardrobeScene, StickerBookScene],
         render: { antialias: true, pixelArt: false },
         input: { activePointers: 2 },
         // All sound is hand-rolled WebAudio (sfx.ts/music.ts) — skip Phaser's

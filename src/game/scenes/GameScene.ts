@@ -46,6 +46,9 @@ export class GameScene extends Phaser.Scene {
   // Tracks whether every special treat kind was collected at least once this
   // run, for the "recipe card" full-clear reward on world completion.
   private treatsCollected = { star: false, bean: false, ketchup: false, balloon: false };
+  // Avoids re-writing to save storage every time an already-met hazard is
+  // hit again within the same run.
+  private metHazardsThisSession = new Set<string>();
 
   private runCoins = 0;
   private score = 0;
@@ -74,6 +77,7 @@ export class GameScene extends Phaser.Scene {
     this.invulnRemainingMs = 0;
     this.recentHitElapsed = [];
     this.treatsCollected = { star: false, bean: false, ketchup: false, balloon: false };
+    this.metHazardsThisSession = new Set<string>();
 
     this.buildBackground();
     this.difficulty = new DifficultyManager();
@@ -456,6 +460,14 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     if (p.kind === "hazard") {
+      // Meeting a hazard (even shielded) is enough to unlock its Sticker Book
+      // entry — the sticker book rewards exposure, not just getting hit.
+      if (p.hazardId && !this.metHazardsThisSession.has(p.hazardId)) {
+        this.metHazardsThisSession.add(p.hazardId);
+        updateSave((d) => {
+          if (!d.metHazards.includes(p.hazardId!)) d.metHazards.push(p.hazardId!);
+        });
+      }
       // Shield / invuln
       if (this.powerups.shieldOn) {
         burst(this, p.x, p.y, 0xffffff, 20);

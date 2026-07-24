@@ -25,7 +25,8 @@ export type IconKind =
   | "sparkle"
   | "globe"
   | "shield"
-  | "bank";
+  | "bank"
+  | "book";
 
 /** Draws an icon centered at (cx, cy). `s` is roughly the icon's half-size. */
 export function drawIcon(
@@ -217,6 +218,23 @@ export function drawIcon(
     case "bank":
       g.fillRoundedRect(cx - s * 0.8, cy - s * 0.5, s * 1.6, s * 1.3, s * 0.25);
       g.fillRect(cx - s * 0.9, cy - s * 0.8, s * 1.8, s * 0.3);
+      break;
+
+    case "book":
+      // Two wide, short "pages" (not tall bars, which read as a pause icon)
+      // with short text-line strokes on each — unambiguous as an open book.
+      g.strokeRoundedRect(cx - s * 1.05, cy - s * 0.55, s * 0.95, s * 1.1, s * 0.12);
+      g.strokeRoundedRect(cx + s * 0.1, cy - s * 0.55, s * 0.95, s * 1.1, s * 0.12);
+      g.beginPath();
+      g.moveTo(cx - s * 0.8, cy - s * 0.15);
+      g.lineTo(cx - s * 0.3, cy - s * 0.15);
+      g.moveTo(cx - s * 0.8, cy + s * 0.2);
+      g.lineTo(cx - s * 0.3, cy + s * 0.2);
+      g.moveTo(cx + s * 0.3, cy - s * 0.15);
+      g.lineTo(cx + s * 0.8, cy - s * 0.15);
+      g.moveTo(cx + s * 0.3, cy + s * 0.2);
+      g.lineTo(cx + s * 0.8, cy + s * 0.2);
+      g.strokePath();
       break;
   }
 }

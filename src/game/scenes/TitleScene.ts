@@ -95,6 +95,24 @@ export class TitleScene extends Phaser.Scene {
       strokeThickness: 6,
     });
 
+    // Sticker Book — a pressure-free collection gallery, tucked in the
+    // opposite corner from the coin counter so it doesn't compete with Play.
+    this.makeButton(
+      width - 36,
+      36,
+      64,
+      54,
+      0x7ad9c4,
+      "",
+      () => {
+        SFX.click();
+        this.scene.start("StickerBook");
+      },
+      24,
+      0xffffff,
+      "book",
+    );
+
     // Play button
     this.makeButton(
       width / 2,
