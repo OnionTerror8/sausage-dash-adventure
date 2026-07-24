@@ -45,7 +45,109 @@ function Page() {
         )}
       </div>
       <RotatePrompt />
+      <FullscreenButton />
     </main>
+  );
+}
+
+/**
+ * Lets a parent get rid of the browser address bar without needing to know
+ * "Add to Home Screen" exists. Android/desktop use the real Fullscreen API;
+ * iOS Safari doesn't support that API for anything but <video>, so there the
+ * button instead explains the Home Screen route (already wired up via the
+ * PWA manifest) since that's the only way to get a chrome-less iOS view.
+ */
+function FullscreenButton() {
+  const [isIOS, setIsIOS] = useState(false);
+  const [standalone, setStandalone] = useState(true); // default hidden until checked
+  const [showIOSHint, setShowIOSHint] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    const iOSDevice =
+      /iPad|iPhone|iPod/.test(ua) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    setIsIOS(iOSDevice);
+
+    const standaloneMode =
+      window.matchMedia?.("(display-mode: standalone)").matches ||
+      (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+    setStandalone(standaloneMode);
+
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
+
+  if (standalone) return null; // already chrome-less — nothing to offer
+
+  const handleClick = () => {
+    if (isIOS) {
+      setShowIOSHint(true);
+      return;
+    }
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    } else {
+      document.documentElement.requestFullscreen?.().catch(() => {
+        /* user gesture requirement or unsupported browser — ignore */
+      });
+    }
+  };
+
+  return (
+    <>
+      <button
+        onClick={handleClick}
+        aria-label="Full screen"
+        className="fixed right-3 top-3 z-[9998] flex h-10 w-10 items-center justify-center rounded-full bg-white/70 shadow-md backdrop-blur-sm transition hover:bg-white/90"
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          {isFullscreen ? (
+            <path
+              d="M7 3H3v4M13 3h4v4M7 17H3v-4M13 17h4v-4"
+              stroke="#6a2a5a"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ) : (
+            <path
+              d="M3 7V3h4M13 3h4v4M3 13v4h4M13 17h4v-4"
+              stroke="#6a2a5a"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
+        </svg>
+      </button>
+
+      {showIOSHint && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 p-6"
+          onClick={() => setShowIOSHint(false)}
+        >
+          <div
+            className="max-w-xs rounded-2xl bg-white p-6 text-center shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-lg font-bold text-[#6a2a5a]">Play full screen!</p>
+            <p className="mt-2 text-sm text-[#6a2a5a]">
+              Tap the Share icon in Safari, then "Add to Home Screen". Opening Sausage Dash! from
+              its own icon plays with no browser bar at all.
+            </p>
+            <button
+              onClick={() => setShowIOSHint(false)}
+              className="mt-4 rounded-full bg-[#ff7a59] px-5 py-2 text-sm font-semibold text-white"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
